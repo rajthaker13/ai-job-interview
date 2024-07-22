@@ -1,5 +1,5 @@
 import { TextInput } from "@tremor/react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import OpenAI from "openai";
 import { Pinecone } from "@pinecone-database/pinecone";
@@ -12,8 +12,32 @@ export default function Home(props) {
   const pinecone = new Pinecone({
     apiKey: process.env.REACT_APP_LINK_PINECONE_KEY,
   });
+
   const [jobDescription, setJobDescription] = useState("");
   const [leetcodeMatches, setLeetodeMatches] = useState([]);
+  const [width, setWidth] = useState(60); // Initial width in vh
+
+  const isResizing = useRef(false);
+
+  const startResizing = () => {
+    isResizing.current = true;
+    document.body.classList.add("no-select");
+  };
+
+  const stopResizing = () => {
+    document.body.classList.remove("no-select");
+    isResizing.current = false;
+  };
+
+  const resize = (e) => {
+    if (isResizing.current) {
+      const newWidth = Math.max(
+        20,
+        Math.min(80, (e.clientX / window.innerWidth) * 100)
+      );
+      setWidth(newWidth);
+    }
+  };
 
   // Determine difficulty color
   const getDifficultyColor = (difficulty) => {
@@ -48,6 +72,8 @@ export default function Home(props) {
       /Constraints:/g,
       "<b>Constraints:</b>"
     );
+    // Convert `code` text to styled code
+    formattedText = formattedText.replace(/`(.*?)`/g, "<code>$1</code>");
     return formattedText;
   };
 
@@ -73,6 +99,7 @@ export default function Home(props) {
     setLeetodeMatches(matchingProblems.matches);
     setJobDescription("");
   }
+
   return (
     <div className="flex-col items-center justify-center mx-[10vw] h-[100vh]">
       <div className="text-center mt-[30vh] flex flex-col items-center">
@@ -93,35 +120,58 @@ export default function Home(props) {
           Submit
         </button>
       </div>
-      <div className="h-[50vh] overflow-scroll">
-        {leetcodeMatches.map((question) => {
-          const { title, difficulty, description, url } = question.metadata;
+      <div className="relative" onMouseMove={resize} onMouseUp={stopResizing}>
+        <div
+          className="overflow-scroll h-[50vh] border p-4"
+          style={{ width: `${width}vh` }}
+        >
+          {leetcodeMatches.map((question) => {
+            const { title, difficulty, description, url } = question.metadata;
 
-          return (
-            <div key={title} className="mb-4">
-              <h2 className="text-xl font-bold">{title}</h2>
-              <p className={`${getDifficultyColor(difficulty)} font-bold`}>
-                {difficulty}
-              </p>
-              <p
-                dangerouslySetInnerHTML={{
-                  __html: formatDescription(description),
-                }}
-              ></p>
-              <br></br>
-              <a
-                href={url}
-                className="text-blue-500 underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View on Leetcode
-              </a>
-              <br></br>
-            </div>
-          );
-        })}
+            return (
+              <div key={title} className="mb-4">
+                <h2 className="text-xl font-bold">{title}</h2>
+                <p className={`${getDifficultyColor(difficulty)} font-bold`}>
+                  {difficulty}
+                </p>
+                <p
+                  dangerouslySetInnerHTML={{
+                    __html: formatDescription(description),
+                  }}
+                ></p>
+                <br></br>
+                <a
+                  href={url}
+                  className="text-blue-500 underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View on Leetcode
+                </a>
+                <br></br>
+              </div>
+            );
+          })}
+        </div>
+        <div
+          className="absolute top-0 h-full w-1 bg-gray-400 cursor-col-resize"
+          style={{ left: `${width}vh` }}
+          onMouseDown={startResizing}
+        ></div>
       </div>
+      <style jsx>{`
+        code {
+          background-color: #f5f5f5;
+          border-radius: 5px;
+          padding: 2px 5px;
+          font-family: "Courier New", Courier, monospace;
+          color: #3f3b3a;
+        }
+
+        .no-select {
+          user-select: none;
+        }
+      `}</style>
     </div>
   );
 }
