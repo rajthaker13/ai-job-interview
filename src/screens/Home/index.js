@@ -1,4 +1,5 @@
-import { TextInput } from "@tremor/react";
+import { TextInput, Button } from "@tremor/react";
+import { RiSearch2Line } from "@remixicon/react";
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import OpenAI from "openai";
@@ -18,9 +19,11 @@ export default function Home(props) {
   const [width, setWidth] = useState(60); // Initial width in vh
 
   const isResizing = useRef(false);
+  const startX = useRef(0);
 
-  const startResizing = () => {
+  const startResizing = (e) => {
     isResizing.current = true;
+    startX.current = e.clientX;
     document.body.classList.add("no-select");
   };
 
@@ -31,11 +34,13 @@ export default function Home(props) {
 
   const resize = (e) => {
     if (isResizing.current) {
+      const deltaX = e.clientX - startX.current;
       const newWidth = Math.max(
         20,
-        Math.min(80, (e.clientX / window.innerWidth) * 100)
+        Math.min(80, width + (deltaX / window.innerWidth) * 100)
       );
       setWidth(newWidth);
+      startX.current = e.clientX;
     }
   };
 
@@ -51,6 +56,44 @@ export default function Home(props) {
       default:
         return "";
     }
+  };
+
+  // Function to format the topics
+  const formatTopics = (topics) => {
+    return topics.split(",").map((topic, index, array) => (
+      <li
+        key={index}
+        className={`py-1 px-2 ${
+          index < array.length - 1 ? "border-b border-gray-300" : ""
+        }`}
+      >
+        {topic.trim()}
+      </li>
+    ));
+  };
+
+  // Component for the Topic Dropdown
+  const TopicDropdown = ({ topics }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+      <div className="relative inline-block text-left">
+        <Button
+          className="ml-2 px-1.5 py-1"
+          color="slate"
+          size="xs"
+          icon={RiSearch2Line}
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          Topics
+        </Button>
+        {isOpen && (
+          <div className="absolute z-10 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg">
+            <ul className="text-sm">{formatTopics(topics)}</ul>
+          </div>
+        )}
+      </div>
+    );
   };
 
   // Function to convert Markdown-like text to HTML
@@ -95,7 +138,6 @@ export default function Home(props) {
       },
     });
 
-    console.log("Matching problems", matchingProblems);
     setLeetodeMatches(matchingProblems.matches);
     setJobDescription("");
   }
@@ -126,14 +168,23 @@ export default function Home(props) {
           style={{ width: `${width}vh` }}
         >
           {leetcodeMatches.map((question) => {
-            const { title, difficulty, description, url } = question.metadata;
+            const { title, difficulty, description, url, related_topics } =
+              question.metadata;
+            console.log(question);
 
             return (
               <div key={title} className="mb-4">
-                <h2 className="text-xl font-bold">{title}</h2>
-                <p className={`${getDifficultyColor(difficulty)} font-bold`}>
-                  {difficulty}
-                </p>
+                <h2 className="text-xl font-bold pb-1">{title}</h2>
+                <div className="flex pb-3">
+                  <p
+                    className={`${getDifficultyColor(
+                      difficulty
+                    )} font-bold pr-2 text-base mt-0.5`}
+                  >
+                    {difficulty}
+                  </p>
+                  <TopicDropdown topics={related_topics} />
+                </div>
                 <p
                   dangerouslySetInnerHTML={{
                     __html: formatDescription(description),
@@ -167,7 +218,6 @@ export default function Home(props) {
           font-family: "Courier New", Courier, monospace;
           color: #3f3b3a;
         }
-
         .no-select {
           user-select: none;
         }
