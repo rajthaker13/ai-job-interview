@@ -13,6 +13,7 @@ export default function Home(props) {
     apiKey: process.env.REACT_APP_LINK_PINECONE_KEY,
   });
   const [jobDescription, setJobDescription] = useState("");
+  const [leetcodeMatches, setLeetodeMatches] = useState([]);
 
   async function getLeetcodeProblems() {
     const embedding = await openai.embeddings.create({
@@ -33,27 +34,39 @@ export default function Home(props) {
     });
 
     console.log("Matching problems", matchingProblems);
+    setLeetodeMatches(matchingProblems.matches);
     setJobDescription("");
   }
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
+    <div className="flex-col items-center justify-center mx-[10vw] h-[100vh]">
+      <div className="text-center mt-[30vh] flex flex-col items-center">
         <p>Enter job description</p>
         <textarea
           value={jobDescription}
           onChange={(e) => {
             setJobDescription(e.target.value);
           }}
-          className="border rounded-md p-2"
+          className="border rounded-md p-2 h-[20vh] w-[30vw] mt-4"
         ></textarea>
         <button
           onClick={async () => {
             await getLeetcodeProblems();
           }}
-          className="mt-4 w-full whitespace-nowrap rounded-tremor-default bg-tremor-brand py-2 text-center text-tremor-default font-medium text-tremor-brand-inverted shadow-tremor-input hover:bg-tremor-brand-emphasis dark:bg-dark-tremor-brand dark:text-dark-tremor-brand-inverted dark:shadow-dark-tremor-input dark:hover:bg-dark-tremor-brand-emphasis"
+          className="mt-4 w-[20vh] whitespace-nowrap rounded-tremor-default bg-tremor-brand py-2 text-center text-tremor-default font-medium text-tremor-brand-inverted shadow-tremor-input hover:bg-tremor-brand-emphasis dark:bg-dark-tremor-brand dark:text-dark-tremor-brand-inverted dark:shadow-dark-tremor-input dark:hover:bg-dark-tremor-brand-emphasis"
         >
           Submit
         </button>
+      </div>
+      <div className="h-[50vh] overflow-scroll">
+        {leetcodeMatches.map((question) => {
+          return (
+            <div>
+              <br />
+              <p>{`${question.metadata.title}: ${question.metadata.description}`}</p>
+              <br />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
