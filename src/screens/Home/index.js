@@ -54,7 +54,7 @@ export default function Home(props) {
           }}
           className="mt-4 w-[20vh] whitespace-nowrap rounded-tremor-default bg-tremor-brand py-2 text-center text-tremor-default font-medium text-tremor-brand-inverted shadow-tremor-input hover:bg-tremor-brand-emphasis dark:bg-dark-tremor-brand dark:text-dark-tremor-brand-inverted dark:shadow-dark-tremor-input dark:hover:bg-dark-tremor-brand-emphasis"
         >
-          Submit
+          Generate Job Interview
         </button>
       </div>
       <div className="h-[50vh] overflow-scroll">
