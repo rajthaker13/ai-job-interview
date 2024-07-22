@@ -43,6 +43,7 @@ export default function Home(props) {
       "<b>Example $1:</b>"
     );
     formattedText = formattedText.replace(/Example:/g, "<b>Example:</b>");
+    formattedText = formattedText.replace(/Note:/g, "<b>Note:</b>");
     formattedText = formattedText.replace(
       /Constraints:/g,
       "<b>Constraints:</b>"
