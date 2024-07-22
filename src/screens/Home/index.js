@@ -15,6 +15,41 @@ export default function Home(props) {
   const [jobDescription, setJobDescription] = useState("");
   const [leetcodeMatches, setLeetodeMatches] = useState([]);
 
+  // Determine difficulty color
+  const getDifficultyColor = (difficulty) => {
+    switch (difficulty) {
+      case "Easy":
+        return "text-green-500";
+      case "Medium":
+        return "text-yellow-500";
+      case "Hard":
+        return "text-red-500";
+      default:
+        return "";
+    }
+  };
+
+  // Function to convert Markdown-like text to HTML
+  const formatDescription = (text) => {
+    // Convert newline characters to <br>
+    let formattedText = text.replace(/\n/g, "<br>");
+    // Convert bold text **text** to <b>text</b>
+    formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
+    // Convert italic text *text* to <i>text</i>
+    formattedText = formattedText.replace(/\*(.*?)\*/g, "<i>$1</i>");
+    // Make special phrases bold
+    formattedText = formattedText.replace(
+      /Example (\d+):/g,
+      "<b>Example $1:</b>"
+    );
+    formattedText = formattedText.replace(/Example:/g, "<b>Example:</b>");
+    formattedText = formattedText.replace(
+      /Constraints:/g,
+      "<b>Constraints:</b>"
+    );
+    return formattedText;
+  };
+
   async function getLeetcodeProblems() {
     const embedding = await openai.embeddings.create({
       model: "text-embedding-3-small",
@@ -59,11 +94,29 @@ export default function Home(props) {
       </div>
       <div className="h-[50vh] overflow-scroll">
         {leetcodeMatches.map((question) => {
+          const { title, difficulty, description, url } = question.metadata;
+
           return (
-            <div>
-              <br />
-              <p>{`${question.metadata.title}: ${question.metadata.description}`}</p>
-              <br />
+            <div key={title} className="mb-4">
+              <h2 className="text-xl font-bold">{title}</h2>
+              <p className={`${getDifficultyColor(difficulty)} font-bold`}>
+                {difficulty}
+              </p>
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: formatDescription(description),
+                }}
+              ></p>
+              <br></br>
+              <a
+                href={url}
+                className="text-blue-500 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View on Leetcode
+              </a>
+              <br></br>
             </div>
           );
         })}
