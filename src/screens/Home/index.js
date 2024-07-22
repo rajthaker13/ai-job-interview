@@ -27,6 +27,9 @@ export default function Home(props) {
       topK: 5,
       vector: embedding.data[0].embedding,
       includeMetadata: true,
+      filter: {
+        description: { $ne: "SQL Schema" },
+      },
     });
 
     console.log("Matching problems", matchingProblems);
