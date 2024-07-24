@@ -2,13 +2,15 @@ import OpenAI from "openai";
 import { TextInput, Button } from "@tremor/react";
 import { RiSearch2Line } from "@remixicon/react";
 import React, { useEffect, useState, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Interview(props) {
   const openai = new OpenAI({
     apiKey: "sk-proj-bDhKwBhyKB0Del1D2IiPT3BlbkFJCAoB10kc39MQMqI5pD2V",
     dangerouslyAllowBrowser: true,
   });
+
+  const navigate = useNavigate();
 
   const [problemWidth, setProblemWidth] = useState(40);
   const [ideHeight, setIdeHeight] = useState(50);
@@ -126,11 +128,21 @@ export default function Interview(props) {
     ));
   };
 
+  function endInterview() {
+    navigate("/report");
+  }
+
   async function promptGPT(userMessage) {
+    let conversationString = "";
+    conversationHistory.map((convo) => {
+      conversationString += convo.type + ": " + convo.content + "\n";
+    });
+
     try {
       const context = `Your name is Katie. You are a tech interviewer for a large software company. You are conducting a technical coding interview with a current or recently graduated university student. Begin the interview by introducing yourself.
       You should only introduce yourself in your first message. If you have already introduced yourself, do not do it again.
       If the student has already given you some of their personal information, do not ask for it again.
+      Here is the current conversation history. Use this as context: ${conversationString}
       The problem given to the student is the following problem: ${leetcodeMatches[0].metadata.title}: ${leetcodeMatches[0].metadata.description}. 
       The student can see this problem and the visible test cases. You don't ever have to repeat the problem statement in its entirety. You can reference parts of it to answer questions though, of course.
       Consider the optimal solution to the problem. The optimal solution is the one that has the best time and space complexity.
@@ -203,7 +215,7 @@ export default function Interview(props) {
           stopYResizing();
         }
       }}
-      style={{ height: "100vh", width: "100vw" }} // Ensure the container takes full viewport height
+      style={{ height: "100vh", width: "100vw" }}
     >
       <div
         className="bg-neutral-800 rounded-lg overflow-y-scroll overflow-x-hidden border border-neutral-700 p-4 ml-4 mt-3 mb-3"
@@ -246,7 +258,7 @@ export default function Interview(props) {
         })}
       </div>
       <div
-        className="absolute rounded w-0.5 h-[97%] bg-neutral-700 hover:bg-blue-500 cursor-col-resize ml-5 mt-3 mb-3"
+        className="vertical-bar absolute rounded w-0.5 h-[97%] bg-neutral-700 hover:bg-blue-500 cursor-col-resize mt-3 mb-3"
         style={{ left: `${problemWidth}%` }}
         onMouseDown={startXResizing}
       ></div>
@@ -255,8 +267,21 @@ export default function Interview(props) {
           className="rounded-lg bg-neutral-800 border border-neutral-700 ml-2.5 mb-1.5 mt-3 mr-4"
           style={{ height: `${ideHeight}%` }}
         >
-          {" "}
-          {/* First div */}
+          <button
+            style={{
+              backgroundColor: "#FF4D4D",
+              color: "white",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              border: "none",
+              fontSize: "13px",
+            }}
+            onClick={() => {
+              endInterview();
+            }}
+          >
+            End Interview
+          </button>
         </div>
         <div
           className="rounded h-0.5 bg-neutral-700 hover:bg-blue-500 cursor-row-resize ml-3 mr-5 mb-1.5"
@@ -269,7 +294,10 @@ export default function Interview(props) {
             width: `${100 - problemWidth}vw`,
           }}
         >
-          <div className="p-2 overflow-scroll">
+          <div
+            className="p-2 overflow-y-auto"
+            style={{ height: "calc(100% - 60px)" }}
+          >
             {conversationHistory.map((msg, index) => (
               <div
                 key={index}
@@ -319,6 +347,9 @@ export default function Interview(props) {
         .overflow-x-hidden {
           overflow-x: hidden;
           word-wrap: break-word;
+        }
+        .vertical-bar {
+          margin-left: -22px;
         }
         input::placeholder {
           color: var(--placeholder-color);
