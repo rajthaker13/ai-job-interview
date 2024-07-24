@@ -153,7 +153,7 @@ export default function Interview(props) {
 
       const response = await openai.chat.completions.create({
         messages: userPrompt,
-        model: "gpt-4",
+        model: "gpt-4o-mini",
       });
 
       const gptResponse = response.choices[0].message.content;
@@ -203,7 +203,7 @@ export default function Interview(props) {
           stopYResizing();
         }
       }}
-      style={{ height: "100vh" }} // Ensure the container takes full viewport height
+      style={{ height: "100vh", width: "100vw" }} // Ensure the container takes full viewport height
     >
       <div
         className="bg-neutral-800 rounded-lg overflow-y-scroll overflow-x-hidden border border-neutral-700 p-4 ml-4 mt-3 mb-3"
@@ -264,13 +264,16 @@ export default function Interview(props) {
         ></div>
         <div
           className="relative rounded-lg bg-neutral-800 border border-neutral-700 ml-2.5 mb-3 mr-4"
-          style={{ height: `${100 - ideHeight}%` }}
+          style={{
+            height: `${100 - ideHeight}%`,
+            width: `${100 - problemWidth}vw`,
+          }}
         >
-          <div className="p-2 overflow-y-scroll">
+          <div className="p-2 overflow-scroll">
             {conversationHistory.map((msg, index) => (
               <div
                 key={index}
-                className={`py-1 ${
+                className={`py-1 whitespace-pre-wrap break-words ${
                   msg.type === "gpt" ? "text-blue-300" : "text-green-300"
                 }`}
               >
