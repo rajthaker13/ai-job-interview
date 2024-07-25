@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./screens/Login";
 import Home from "./screens/Home";
 import Interview from "./screens/Interview";
+import Report from "./screens/Report";
 
 function App() {
   const supabaseUrl = "https://twqwiryumiolecfebqtd.supabase.co";
@@ -21,6 +22,7 @@ function App() {
         />
         <Route path="/home" element={<Home db={supabase} />} />
         <Route path="/interview" element={<Interview db={supabase} />} />
+        <Route path="/report" element={<Report db={supabase} />} />
       </Routes>
     </Router>
   );

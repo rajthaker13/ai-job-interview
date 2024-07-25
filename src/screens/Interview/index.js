@@ -14,7 +14,13 @@ export default function Interview(props) {
 
   const [problemWidth, setProblemWidth] = useState(40);
   const [ideHeight, setIdeHeight] = useState(50);
-  const [conversationHistory, setConversationHistory] = useState([]);
+  const [conversationHistory, setConversationHistory] = useState([
+    {
+      type: "gpt",
+      content:
+        "Hi, I'm Katie, and I'll be conducting your technical interview today. Let's get started! Please read over the problem and let me know if you have any clarifying questions. Remember to clearly explain your thought process throughout the interview. I'm here to help! Can you start by introducing yourself?",
+    },
+  ]);
 
   const isXResizing = useRef(false);
   const startX = useRef(0);
@@ -83,13 +89,20 @@ export default function Interview(props) {
   };
 
   // Function to convert Markdown-like text to HTML
-  const formatDescription = (text) => {
+  const markdownToHTML = (text) => {
     // Convert newline characters to <br>
     let formattedText = text.replace(/\n/g, "<br>");
+
+    // Convert LaTeX delimiters for inline math
+    formattedText = formattedText.replace(/\\\((.*?)\\\)/g, "$1");
+    formattedText = formattedText.replace(/\\\[(.*?)\\\]/g, "$1");
+
     // Convert bold text **text** to <b>text</b>
     formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
+
     // Convert italic text *text* to <i>text</i>
     formattedText = formattedText.replace(/\*(.*?)\*/g, "<i>$1</i>");
+
     // Make special phrases bold
     formattedText = formattedText.replace(
       /Example (\d+):/g,
@@ -101,8 +114,10 @@ export default function Interview(props) {
       /Constraints:/g,
       "<b>Constraints:</b>"
     );
+
     // Convert `code` text to styled code
     formattedText = formattedText.replace(/`(.*?)`/g, "<code>$1</code>");
+
     return formattedText;
   };
 
@@ -129,7 +144,12 @@ export default function Interview(props) {
   };
 
   function endInterview() {
-    navigate("/report");
+    navigate("/report", {
+      state: {
+        conversationHistory: conversationHistory,
+        leetcodeMatches: leetcodeMatches,
+      },
+    });
   }
 
   async function promptGPT(userMessage) {
@@ -143,7 +163,9 @@ export default function Interview(props) {
       You should only introduce yourself in your first message. If you have already introduced yourself, do not do it again.
       If the student has already given you some of their personal information, do not ask for it again.
       Here is the current conversation history. Use this as context: ${conversationString}
-      The problem given to the student is the following problem: ${leetcodeMatches[0].metadata.title}: ${leetcodeMatches[0].metadata.description}. 
+      The problem given to the student is the following problem: ${
+        leetcodeMatches ? leetcodeMatches[0].metadata.title : ""
+      } ${leetcodeMatches ? leetcodeMatches[0].metadata.description : ""}. 
       The student can see this problem and the visible test cases. You don't ever have to repeat the problem statement in its entirety. You can reference parts of it to answer questions though, of course.
       Consider the optimal solution to the problem. The optimal solution is the one that has the best time and space complexity.
       You are to act as an interviewer, not as AI helping the student. You may subtly nudge the student if their attempt is very far off from the correct answer, but let them do 90% of the work.
@@ -153,7 +175,8 @@ export default function Interview(props) {
       Run the students code and tell the student whether or not they passed all the test cases. If they did, but not optimally, ask if there is any room for time or space complexity improvement.
       Ask the student what the time and space complexity of their implementation is if it works, and tell them whether they are correct or not.
       You should test all edge cases, check for compiler errors, runtime errors, and everything that would prevent the program from working correctly in an IDE.
-      If the student submits to you a question or asks for clarification on the problem, do you best to answer, but if the question simply asks you for an implementation or answer, state that that is the job of the student themself.`;
+      If the student submits to you a question or asks for clarification on the problem, do you best to answer, but if the question simply asks you for an implementation or answer, state that that is the job of the student themself.
+      Don't include any LaTex style characters in your response. You can only use markdown elements and regular characters.`;
 
       let userPrompt = [
         { role: "system", content: context },
@@ -172,7 +195,7 @@ export default function Interview(props) {
 
       setConversationHistory((prevHistory) => [
         ...prevHistory,
-        { type: "gpt", content: gptResponse },
+        { type: "gpt", content: markdownToHTML(gptResponse) },
       ]);
     } catch (error) {
       console.log(error);
@@ -221,41 +244,43 @@ export default function Interview(props) {
         className="bg-neutral-800 rounded-lg overflow-y-scroll overflow-x-hidden border border-neutral-700 p-4 ml-4 mt-3 mb-3"
         style={{ width: `${problemWidth}%` }}
       >
-        {leetcodeMatches.map((question) => {
-          const { title, difficulty, description, url, related_topics } =
-            question.metadata;
+        {leetcodeMatches &&
+          leetcodeMatches[0] &&
+          leetcodeMatches.map((question) => {
+            const { title, difficulty, description, url, related_topics } =
+              question.metadata;
 
-          return (
-            <div key={title} className="mb-4">
-              <h2 className="text-xl font-bold pb-1">{title}</h2>
-              <div className="flex pb-3">
+            return (
+              <div key={title} className="mb-4">
+                <h2 className="text-xl font-bold pb-1">{title}</h2>
+                <div className="flex pb-3">
+                  <p
+                    className={`${getDifficultyColor(
+                      difficulty
+                    )} font-bold pr-2 text-base mt-0.5`}
+                  >
+                    {difficulty}
+                  </p>
+                  <TopicDropdown topics={related_topics} />
+                </div>
                 <p
-                  className={`${getDifficultyColor(
-                    difficulty
-                  )} font-bold pr-2 text-base mt-0.5`}
+                  dangerouslySetInnerHTML={{
+                    __html: markdownToHTML(description),
+                  }}
+                ></p>
+                <br></br>
+                <a
+                  href={url}
+                  className="text-blue-400 underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  {difficulty}
-                </p>
-                <TopicDropdown topics={related_topics} />
+                  View on Leetcode
+                </a>
+                <br></br>
               </div>
-              <p
-                dangerouslySetInnerHTML={{
-                  __html: formatDescription(description),
-                }}
-              ></p>
-              <br></br>
-              <a
-                href={url}
-                className="text-blue-400 underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View on Leetcode
-              </a>
-              <br></br>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
       <div
         className="vertical-bar absolute rounded w-0.5 h-[97%] bg-neutral-700 hover:bg-blue-500 cursor-col-resize mt-3 mb-3"
@@ -264,7 +289,7 @@ export default function Interview(props) {
       ></div>
       <div className="flex flex-col flex-grow">
         <div
-          className="rounded-lg bg-neutral-800 border border-neutral-700 ml-2.5 mb-1.5 mt-3 mr-4"
+          className="rounded-lg bg-neutral-800 border border-neutral-700 ml-2.5 mb-1.5 mt-3 mr-4 p-4"
           style={{ height: `${ideHeight}%` }}
         >
           <button
@@ -299,14 +324,15 @@ export default function Interview(props) {
             style={{ height: "calc(100% - 60px)" }}
           >
             {conversationHistory.map((msg, index) => (
-              <div
+              <p
                 key={index}
+                dangerouslySetInnerHTML={{
+                  __html: msg.content,
+                }}
                 className={`py-1 whitespace-pre-wrap break-words ${
                   msg.type === "gpt" ? "text-blue-300" : "text-green-300"
                 }`}
-              >
-                {msg.content}
-              </div>
+              ></p>
             ))}
           </div>
           <div className="absolute bottom-0 left-0 w-full p-2 bg-neutral-800">
