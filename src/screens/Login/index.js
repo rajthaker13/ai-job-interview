@@ -1,6 +1,7 @@
 import { TextInput } from "@tremor/react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import automock from "../../assets/logo.png";
 
 export default function Login(props) {
   const [email, setEmail] = useState("");
@@ -36,20 +37,20 @@ export default function Login(props) {
   }
 
   return (
-    <div className="flex justify-center align-middle text-center h-[100vh]">
-      <div className="bg-white h-[auto] py-80 rounded-lg w-[40vw]">
+    <div className="flex justify-center align-middle text-center h-[100vh] bg-[#05050D]">
+      <div className=" h-[auto] py-80 rounded-lg w-[20vw]">
         <div className="">
-          {/* <img
-              src={boondoggleai}
-              className="object-cover w-[100%] h-[8vh] justify-center content-center mb-5"
-            /> */}
-          <span className="text-center text-tremor-title font-semibold text-tremor-content-strong dark:text-dark-tremor-content-strong leading-[1px]">
+          <img
+            src={automock}
+            className="object-contain w-[100%] h-[5vh] justify-center content-center mb-5"
+          />
+          <span className="text-center text-tremor-title text-white font-semibold text-tremor-content-strong dark:text-dark-tremor-content-strong leading-[1px]">
             Log in or create account
           </span>
           <div className="mt-6 text-left">
             <label
               htmlFor="email"
-              className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong text-left"
+              className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong text-left text-white"
             >
               Email
             </label>
@@ -59,13 +60,13 @@ export default function Login(props) {
               name="email"
               autoComplete="email"
               placeholder="john@company.com"
-              className="mt-2"
+              className="mt-4 mb-4"
               value={email}
               onValueChange={setEmail}
             />
             <label
               htmlFor="email"
-              className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong text-left"
+              className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong text-left text-white"
             >
               Password
             </label>
@@ -75,7 +76,7 @@ export default function Login(props) {
               name="password"
               autoComplete="password"
               placeholder="Password"
-              className="mt-2"
+              className="mt-4 mb-4"
               value={password}
               onValueChange={setPassword}
             />
@@ -83,7 +84,7 @@ export default function Login(props) {
               <>
                 <label
                   htmlFor="email"
-                  className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong text-left"
+                  className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong text-left text-white"
                 >
                   Confirm password
                 </label>
@@ -93,7 +94,7 @@ export default function Login(props) {
                   name="password"
                   autoComplete="password"
                   placeholder="Password"
-                  className="mt-2"
+                  className="mt-4 mb-4"
                   value={confirmPassword}
                   onValueChange={setConfirmPassword}
                 />
@@ -114,7 +115,7 @@ export default function Login(props) {
             </button>
           </div>
           {isNewAccount && (
-            <p className="mt-4 text-tremor-label text-tremor-content dark:text-dark-tremor-content">
+            <p className="mt-4 text-tremor-subtitle text-tremor-content dark:text-dark-tremor-content">
               Already have an account?{" "}
               <a href="/login" className="underline underline-offset-4">
                 Sign In here
@@ -122,7 +123,7 @@ export default function Login(props) {
             </p>
           )}
           {!isNewAccount && (
-            <p className="mt-4 text-tremor-label text-tremor-content dark:text-dark-tremor-content">
+            <p className="mt-4 text-tremor-subtitle text-tremor-content dark:text-dark-tremor-content">
               Don't have an account?{" "}
               <a href="/" className="underline underline-offset-4">
                 Sign up here
