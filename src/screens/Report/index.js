@@ -18,7 +18,7 @@ export default function Report(props) {
     const width = window.innerWidth;
     const height = window.innerHeight;
     // Adjust the radius calculation as needed
-    const radius = Math.min(width, height) * 0.1; // Example: 10% of the smaller dimension
+    const radius = Math.min(width, height) * 0.1;
     return radius;
   }
 
@@ -29,8 +29,53 @@ export default function Report(props) {
   const [technicalScores, setTechnicalScores] = useState([]);
   const [verbalScores, setVerbalScores] = useState([]);
   const [overallScore, setOverallScore] = useState(0);
-  const [detailScore, setDetailScore] = useState("");
+  const [scoreDiscussion, setScoreDicussion] = useState([]);
   const [firstLoad, setFirstLoad] = useState(true);
+
+  async function chatWithCoach(userMessage) {
+    let conversationString = "";
+    conversationHistory.map((convo) => {
+      conversationString += convo.type + ": " + convo.content + "\n";
+    });
+
+    let discussionString = "";
+    scoreDiscussion.map((convo) => {
+      discussionString += convo.type + ": " + convo.content + "\n";
+    });
+
+    try {
+      const context = `You are a techincal/software engineering interview coach. You are reviewing the transcript of a technical coding interview with a current or recently graduated university student.
+      Here is the transcript of the interview. Use this as context: ${conversationString}
+
+      Here is a list of attributes they were graded on. The first set of attributes are technical, and the second set are behavioral attributes.
+      ${technicalScores} ${verbalScores}
+
+      Here is your current conversation with the student: ${discussionString}. Help the student improve their ability to succeed in technical interviews. Answer their questions and provide advice on how to improve in technical aspects as well as behavioral aspects.
+      `;
+
+      let userPrompt = [
+        { role: "system", content: context },
+        {
+          role: "user",
+          content: userMessage,
+        },
+      ];
+
+      const response = await openai.chat.completions.create({
+        messages: userPrompt,
+        model: "gpt-4o-mini",
+      });
+
+      const gptResponse = response.choices[0].message.content;
+
+      setScoreDicussion((prevHistory) => [
+        ...prevHistory,
+        { type: "gpt", content: markdownToHTML(gptResponse) },
+      ]);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   async function generateReport() {
     let conversationString = "";
@@ -67,7 +112,7 @@ export default function Report(props) {
         {
           role: "user",
           content:
-            "Based on the converstion, generate 4 technical categories to score the applicant on. These categories should not cover behavioral topics like communication. One of these categories should be 'Code', but the other two should by picked based on what was convered in the interview. For example, if the student was asked about the time and space complexity of their program, a relevant category to score them on might be 'Big-O'. Be creative and make it customized to the interview. All scores should be out of 100. Don't return scores in multiples of 5. Return your answer in the following format and nothing else: [{name: String, score: int}, {name: String, score: int}, {name: String, score: int}]. All keys must be enclosed in double quotes to conform to JSON.parse function.",
+            "Based on the converstion, generate 4 technical categories to score the applicant on. These categories should not cover behavioral topics like communication. One of these categories should be 'Code', but the other two should by picked based on what was convered in the interview. For example, if the student was asked about the time and space complexity of their program, a relevant category to score them on might be 'Big-O'. Be creative and make it customized to the interview. All scores should be out of 100. Don't return scores in multiples of 5. Category names should be maximum 3 words. Return your answer in the following format and nothing else: [{name: String, score: int}, {name: String, score: int}, {name: String, score: int}]. All keys must be enclosed in double quotes to conform to JSON.parse function.",
         },
       ];
 
@@ -85,7 +130,7 @@ export default function Report(props) {
         {
           role: "user",
           content:
-            "Based on the converstion, generate 4 behavioral categories to score the applicant on. These should be non-technical and not be related coding or problem-solving. The student should be actively engaging with the interviewer throughout the interview, showing them their thought process. The student should also demonstrate the kind of team member they would be should they be hired. The categories should by picked based on what was convered in the interview. Be creative and make it customized to the interview. All scores should be out of 100. Do not return scores in multiples of 5. If the student is rude, mostly silent, or dismissive, dock their score significantly. It requires excellent communication skills, abundant kindness, and detailed insights into their thinking process to achieve a score near 100. Return your answer in the following format and nothing else: [{name: String, score: int}, {name: String, score: int}, {name: String, score: int}]. All keys must be enclosed in double quotes to conform to JSON.parse function.",
+            "Based on the converstion, generate 4 behavioral categories to score the applicant on. These should be non-technical and not be related coding or problem-solving. The student should be actively engaging with the interviewer throughout the interview, showing them their thought process. The student should also demonstrate the kind of team member they would be should they be hired. The categories should by picked based on what was convered in the interview. Be creative and make it customized to the interview. All scores should be out of 100. Do not return scores in multiples of 5. If the student is rude, mostly silent, or dismissive, dock their score significantly. It requires excellent communication skills, abundant kindness, and detailed insights into their thinking process to achieve a score near 100. Category names should be maximum 3 words. Return your answer in the following format and nothing else: [{name: String, score: int}, {name: String, score: int}, {name: String, score: int}]. All keys must be enclosed in double quotes to conform to JSON.parse function.",
         },
       ];
 
@@ -112,25 +157,28 @@ export default function Report(props) {
 
       setOverallScore(overallResponse.choices[0].message.content);
 
-      let detailPrompt = [
+      let discussionPrompt = [
         { role: "system", content: context },
         {
           role: "user",
-          content:
-            "Write a list of 4 bullet-points highlighting the 4 most important points to help the student. You should focus 3 points on how the student can improve, and 1 point highlighting their strongest strength in the interview.",
+          content: `Write a list of 4 bullet-points highlighting the 4 most important points to help the student. Put line breaks between each bullet-point. You should focus 3 points on how the student can improve, and 1 point highlighting their strongest strength in the interview. These are the student's grades in specific categories: ${technicalScores} ${verbalScores} Return only these 4 bullet-points and nothing else. Each bullet-point should start a with title in bold, followed by an explanation`,
         },
       ];
 
-      const detailResponse = await openai.chat.completions.create({
-        messages: detailPrompt,
+      const discussionResponse = await openai.chat.completions.create({
+        messages: discussionPrompt,
         model: "gpt-4o",
       });
 
-      setDetailScore(detailResponse.choices[0].message.content);
-
-      console.log("technical: ", technicalScores);
-      console.log("overall: ", overallScore);
-      console.log(detailScore);
+      setScoreDicussion([
+        ...scoreDiscussion,
+        {
+          type: "gpt",
+          content: markdownToHTML(
+            discussionResponse.choices[0].message.content
+          ),
+        },
+      ]);
     } catch (error) {
       console.log(error);
     }
@@ -224,7 +272,7 @@ export default function Report(props) {
       className="bg-[#05050D] text-white flex-col"
       style={{ height: "100vh", width: "100vw" }}
     >
-      <p className="font-bold text-4xl pl-6 pt-5 pb-5">Your Interview Report</p>
+      <p className="font-bold text-4xl pl-6 pt-6 pb-3">Your Interview Report</p>
       <div className="flex justify-center mt-5">
         <div
           className="flex-col w-[40vw] ml-5"
@@ -255,7 +303,7 @@ export default function Report(props) {
               selectedDiv == "technical"
                 ? "border-neutral-500"
                 : "border-neutral-700"
-            } h-[30vh] flex items-center justify-center`}
+            } h-[30vh] flex justify-center overflow-y-auto`}
             style={{
               borderTopLeftRadius: "0",
               borderTopRightRadius: "0",
@@ -307,7 +355,7 @@ export default function Report(props) {
               selectedDiv == "verbal"
                 ? "border-neutral-500"
                 : "border-neutral-700"
-            } h-[30vh] flex items-center justify-center`}
+            } h-[30vh] flex justify-center overflow-y-auto`}
             style={{
               borderTopLeftRadius: "0",
               borderTopRightRadius: "0",
@@ -406,23 +454,56 @@ export default function Report(props) {
             <p className="p-2 font-bold">Coach's Report</p>
           </div>
           <div
-            className={`bg-neutral-800 border-b border-l border-r ${
+            className={`bg-neutral-800 border-l border-r ${
               selectedDiv == "feedback"
                 ? "border-neutral-500"
                 : "border-neutral-700"
             } h-[35vh] flex px-5 py-2 overflow-y-auto`}
+          >
+            <div className="flex-col">
+              {scoreDiscussion.map((msg, index) => (
+                <p
+                  key={index}
+                  dangerouslySetInnerHTML={{
+                    __html: msg.content,
+                  }}
+                  className={`py-1 whitespace-pre-wrap break-words ${
+                    msg.type === "gpt" ? "text-blue-300" : "text-white-300"
+                  }`}
+                ></p>
+              ))}
+            </div>
+          </div>
+          <div
+            className={`bg-neutral-800 border-b border-l border-r ${
+              selectedDiv == "feedback"
+                ? "border-neutral-500"
+                : "border-neutral-700"
+            } bottom-0 left-0 w-full p-2 bg-neutral-800`}
             style={{
-              borderTopLeftRadius: "0",
-              borderTopRightRadius: "0",
+              borderTopLeftRadius: "0px",
+              borderTopRightRadius: "0px",
               borderBottomRightRadius: "10px",
               borderBottomLeftRadius: "10px",
             }}
           >
-            <p
-              dangerouslySetInnerHTML={{
-                __html: markdownToHTML(detailScore),
+            <input
+              onKeyDown={async (event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  let temp = event.target.value;
+                  event.target.value = "";
+                  setScoreDicussion((prevHistory) => [
+                    ...prevHistory,
+                    { type: "user", content: temp },
+                  ]);
+                  await chatWithCoach(temp);
+                }
               }}
-            ></p>
+              className="w-full h-[5vh] rounded-lg border border-neutral-700 bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Ask for more feedback..."
+              style={{ "--placeholder-color": "#a0aec0" }}
+            />
           </div>
         </div>
         <div
@@ -454,7 +535,7 @@ export default function Report(props) {
               selectedDiv == "problems"
                 ? "border-neutral-500"
                 : "border-neutral-700"
-            } h-[35vh] flex items-start justify-start overflow-y-auto`}
+            } h-[42vh] flex items-start justify-start overflow-y-auto`}
             style={{
               borderTopLeftRadius: "0",
               borderTopRightRadius: "0",
