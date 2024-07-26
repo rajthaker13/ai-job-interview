@@ -14,6 +14,7 @@ export default function Interview(props) {
 
   const [problemWidth, setProblemWidth] = useState(40);
   const [ideHeight, setIdeHeight] = useState(50);
+  const [selectedDiv, setSelectedDiv] = useState(null);
   const [conversationHistory, setConversationHistory] = useState([
     {
       type: "gpt",
@@ -159,8 +160,7 @@ export default function Interview(props) {
     });
 
     try {
-      const context = `Your name is Katie. You are a tech interviewer for a large software company. You are conducting a technical coding interview with a current or recently graduated university student. Begin the interview by introducing yourself.
-      You should only introduce yourself in your first message. If you have already introduced yourself, do not do it again.
+      const context = `Your name is Katie. You are a tech interviewer for a large software company. You are conducting a technical coding interview with a current or recently graduated university student.
       If the student has already given you some of their personal information, do not ask for it again.
       Here is the current conversation history. Use this as context: ${conversationString}
       The problem given to the student is the following problem: ${
@@ -169,11 +169,11 @@ export default function Interview(props) {
       The student can see this problem and the visible test cases. You don't ever have to repeat the problem statement in its entirety. You can reference parts of it to answer questions though, of course.
       Consider the optimal solution to the problem. The optimal solution is the one that has the best time and space complexity.
       You are to act as an interviewer, not as AI helping the student. You may subtly nudge the student if their attempt is very far off from the correct answer, but let them do 90% of the work.
-      Let them fail if they cannot reach a solution. You are not meant to help the student, but to grade their ability.
+      Let them fail if they cannot reach a solution. You are not meant to help the student, but to grade their ability and engage in a discussion about the problem. Don't give hints unless the student asks for them.
       You should encourage the student to talk through their solution, discussing ideas and potential implementations.
       If the student submits code to you, you are to grade it using the test cases in the problem description as well as new test cases you come up with. You don't need to display the test cases, just comment on whether the code passed the test case or not.
+      Ask the student what they think the time and space complexity of their implementation is. Have a discussion about it, but do not give them the answer. They must come to the answer themselves.
       Run the students code and tell the student whether or not they passed all the test cases. If they did, but not optimally, ask if there is any room for time or space complexity improvement.
-      Ask the student what the time and space complexity of their implementation is if it works, and tell them whether they are correct or not.
       You should test all edge cases, check for compiler errors, runtime errors, and everything that would prevent the program from working correctly in an IDE.
       If the student submits to you a question or asks for clarification on the problem, do you best to answer, but if the question simply asks you for an implementation or answer, state that that is the job of the student themself.
       Don't include any LaTex style characters in your response. You can only use markdown elements and regular characters.`;
@@ -228,7 +228,7 @@ export default function Interview(props) {
 
   return (
     <div
-      className="bg-neutral-900 text-white flex"
+      className="bg-[#05050D] text-white flex"
       onMouseMove={resize}
       onMouseUp={() => {
         if (isXResizing) {
@@ -241,8 +241,13 @@ export default function Interview(props) {
       style={{ height: "100vh", width: "100vw" }}
     >
       <div
-        className="bg-neutral-800 rounded-lg overflow-y-scroll overflow-x-hidden border border-neutral-700 p-4 ml-4 mt-3 mb-3"
+        className={`bg-neutral-800 rounded-lg overflow-y-auto border ${
+          selectedDiv === "problem"
+            ? "border-neutral-500"
+            : "border-neutral-700"
+        } p-4 ml-4 mt-3 mb-3`}
         style={{ width: `${problemWidth}%` }}
+        onClick={() => setSelectedDiv("problem")}
       >
         {leetcodeMatches &&
           leetcodeMatches[0] &&
@@ -289,8 +294,11 @@ export default function Interview(props) {
       ></div>
       <div className="flex flex-col flex-grow">
         <div
-          className="rounded-lg bg-neutral-800 border border-neutral-700 ml-2.5 mb-1.5 mt-3 mr-4 p-4"
+          className={`rounded-lg bg-neutral-800 border ${
+            selectedDiv === "ide" ? "border-neutral-500" : "border-neutral-700"
+          } ml-2.5 mb-1.5 mt-3 mr-4 p-4`}
           style={{ height: `${ideHeight}%` }}
+          onClick={() => setSelectedDiv("ide")}
         >
           <button
             style={{
@@ -313,14 +321,19 @@ export default function Interview(props) {
           onMouseDown={startYResizing}
         ></div>
         <div
-          className="relative rounded-lg bg-neutral-800 border border-neutral-700 ml-2.5 mb-3 mr-4"
+          className={`relative rounded-lg bg-neutral-800 border ${
+            selectedDiv === "conversation"
+              ? "border-neutral-500"
+              : "border-neutral-700"
+          } ml-2.5 mb-3 mr-4`}
           style={{
             height: `${100 - ideHeight}%`,
             width: `${100 - problemWidth}vw`,
           }}
+          onClick={() => setSelectedDiv("conversation")}
         >
           <div
-            className="p-2 overflow-y-auto"
+            className="p-2 overflow-y-auto text-lg"
             style={{ height: "calc(100% - 60px)" }}
           >
             {conversationHistory.map((msg, index) => (
@@ -330,7 +343,7 @@ export default function Interview(props) {
                   __html: msg.content,
                 }}
                 className={`py-1 whitespace-pre-wrap break-words ${
-                  msg.type === "gpt" ? "text-blue-300" : "text-green-300"
+                  msg.type === "gpt" ? "text-blue-300" : "text-white-300"
                 }`}
               ></p>
             ))}
@@ -366,13 +379,6 @@ export default function Interview(props) {
         }
         .no-select {
           user-select: none;
-        }
-        .overflow-y-scroll {
-          overflow-y: scroll;
-        }
-        .overflow-x-hidden {
-          overflow-x: hidden;
-          word-wrap: break-word;
         }
         .vertical-bar {
           margin-left: -22px;
