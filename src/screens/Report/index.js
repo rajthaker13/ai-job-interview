@@ -184,7 +184,6 @@ export default function Report(props) {
     }
   }
 
-  // Function to convert Markdown-like text to HTML
   const markdownToHTML = (text) => {
     // Convert newline characters to <br>
     let formattedText = text.replace(/\n/g, "<br>");
@@ -213,6 +212,26 @@ export default function Report(props) {
 
     // Convert `code` text to styled code
     formattedText = formattedText.replace(/`(.*?)`/g, "<code>$1</code>");
+
+    // Convert Markdown headers to HTML headers
+    formattedText = formattedText.replace(
+      /###### (.*?)(<br>|$)/g,
+      "<h6>$1</h6>$2"
+    );
+    formattedText = formattedText.replace(
+      /##### (.*?)(<br>|$)/g,
+      "<h5>$1</h5>$2"
+    );
+    formattedText = formattedText.replace(
+      /#### (.*?)(<br>|$)/g,
+      "<h4>$1</h4>$2"
+    );
+    formattedText = formattedText.replace(
+      /### (.*?)(<br>|$)/g,
+      "<h3>$1</h3>$2"
+    );
+    formattedText = formattedText.replace(/## (.*?)(<br>|$)/g, "<h2>$1</h2>$2");
+    formattedText = formattedText.replace(/# (.*?)(<br>|$)/g, "<h1>$1</h1>$2");
 
     return formattedText;
   };
@@ -495,7 +514,7 @@ export default function Report(props) {
                   event.target.value = "";
                   setScoreDicussion((prevHistory) => [
                     ...prevHistory,
-                    { type: "user", content: temp },
+                    { type: "user", content: markdownToHTML(temp) },
                   ]);
                   await chatWithCoach(temp);
                 }
@@ -584,6 +603,35 @@ export default function Report(props) {
         .overflow-x-hidden {
           overflow-x: hidden;
           word-wrap: break-word;
+        }
+        h1 {
+          font-size: 1.75em;
+          font-weight: bold;
+        }
+
+        h2 {
+          font-size: 1.5em;
+          font-weight: bold;
+        }
+
+        h3 {
+          font-size: 1.25em;
+          font-weight: bold;
+        }
+
+        h4 {
+          font-size: 1em;
+          font-weight: bold;
+        }
+
+        h5 {
+          font-size: 0.875em;
+          font-weight: bold;
+        }
+
+        h6 {
+          font-size: 0.75em;
+          font-weight: bold;
         }
       `}</style>
     </div>

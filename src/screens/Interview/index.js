@@ -348,7 +348,15 @@ export default function Interview(props) {
               ></p>
             ))}
           </div>
-          <div className="absolute bottom-0 left-0 w-full p-2 bg-neutral-800">
+          <div
+            className="absolute bottom-0 left-0 w-full p-2 bg-neutral-800"
+            style={{
+              borderTopLeftRadius: "0px",
+              borderTopRightRadius: "0px",
+              borderBottomRightRadius: "10px",
+              borderBottomLeftRadius: "10px",
+            }}
+          >
             <input
               onKeyDown={async (event) => {
                 if (event.key === "Enter") {
@@ -364,7 +372,9 @@ export default function Interview(props) {
               }}
               className="w-full p-2 rounded-lg border border-neutral-700 bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Talk to your interviewer..."
-              style={{ "--placeholder-color": "#a0aec0" }}
+              style={{
+                "--placeholder-color": "#a0aec0",
+              }}
             />
           </div>
         </div>
