@@ -32,12 +32,28 @@ export default function Login(props) {
       });
       localStorage.setItem("email", data.user.email);
       localStorage.setItem("uid", data.user.id);
-      navigation("/home");
+      //navigation("/home");
     }
   }
 
+  async function signInWithOAuth(provider) {
+    try {
+      localStorage.clear();
+      const { data, error } = await props.db.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+          redirectTo: "http://localhost:3000/home",
+        },
+      })
+      
+    } catch (error) {
+      console.error(`Error signing in with ${provider}:`, error);
+    }
+  }
+  
+
   return (
-    <div className="flex justify-center align-middle text-center h-[100vh] bg-[#05050D]">
+    <div className="flex justify-center align-middle text-center h-[110vh] bg-[#05050D]">
       <div className=" h-[auto] py-80 rounded-lg w-[20vw]">
         <div className="">
           <img
@@ -112,6 +128,23 @@ export default function Login(props) {
               className="mt-4 w-full whitespace-nowrap rounded-tremor-default bg-tremor-brand py-2 text-center text-tremor-default font-medium text-tremor-brand-inverted shadow-tremor-input hover:bg-tremor-brand-emphasis dark:bg-dark-tremor-brand dark:text-dark-tremor-brand-inverted dark:shadow-dark-tremor-input dark:hover:bg-dark-tremor-brand-emphasis"
             >
               {isNewAccount ? "Create account" : "Sign in"}
+            </button>
+            <button
+              onClick={async () => {
+                await signInWithOAuth('google');
+              }}
+              className="mt-4 w-full whitespace-nowrap rounded-tremor-default bg-tremor-brand py-2 text-center text-tremor-default font-medium text-tremor-brand-inverted shadow-tremor-input hover:bg-tremor-brand-emphasis dark:bg-dark-tremor-brand dark:text-dark-tremor-brand-inverted dark:shadow-dark-tremor-input dark:hover:bg-dark-tremor-brand-emphasis"
+            >
+              {isNewAccount ? "Create account with Google" : "Sign in with Google"}
+            </button>
+            
+            <button
+              onClick={async () => {
+                await signInWithOAuth('github');
+              }}
+              className="mt-4 w-full whitespace-nowrap rounded-tremor-default bg-tremor-brand py-2 text-center text-tremor-default font-medium text-tremor-brand-inverted shadow-tremor-input hover:bg-tremor-brand-emphasis dark:bg-dark-tremor-brand dark:text-dark-tremor-brand-inverted dark:shadow-dark-tremor-input dark:hover:bg-dark-tremor-brand-emphasis"
+            >
+              {isNewAccount ? "Create account with Github" : "Sign in with Github"}
             </button>
           </div>
           {isNewAccount && (
