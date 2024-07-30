@@ -3,6 +3,8 @@ import { TextInput, Button } from "@tremor/react";
 import { RiSearch2Line } from "@remixicon/react";
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import gptPic from "../../assets/favicon.png";
+import userPic from "../../assets/user.png";
 
 export default function Interview(props) {
   const openai = new OpenAI({
@@ -337,15 +339,26 @@ export default function Interview(props) {
             style={{ height: "calc(100% - 60px)" }}
           >
             {conversationHistory.map((msg, index) => (
-              <p
-                key={index}
-                dangerouslySetInnerHTML={{
-                  __html: msg.content,
-                }}
-                className={`py-1 whitespace-pre-wrap break-words ${
-                  msg.type === "gpt" ? "text-blue-300" : "text-white-300"
-                }`}
-              ></p>
+              <div className="flex mb-3">
+                <img
+                  className="mr-3 mt-0.5"
+                  src={msg.type == "gpt" ? gptPic : userPic}
+                  style={{
+                    width: "30px",
+                    height: "30px",
+                    borderRadius: "50%",
+                  }}
+                />
+                <p
+                  key={index}
+                  dangerouslySetInnerHTML={{
+                    __html: msg.content,
+                  }}
+                  className={`py-1 whitespace-pre-wrap break-words ${
+                    msg.type === "gpt" ? "text-blue-300" : "text-white-300"
+                  }`}
+                ></p>
+              </div>
             ))}
           </div>
           <div
