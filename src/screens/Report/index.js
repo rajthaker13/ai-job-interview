@@ -24,13 +24,16 @@ export default function Report(props) {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { conversationHistory, leetcodeMatches } = location.state || {};
+  const { conversationHistory, leetcodeMatches, interviewID } =
+    location.state || {};
 
   const [technicalScores, setTechnicalScores] = useState([]);
   const [verbalScores, setVerbalScores] = useState([]);
   const [overallScore, setOverallScore] = useState(0);
   const [scoreDiscussion, setScoreDicussion] = useState([]);
   const [firstLoad, setFirstLoad] = useState(true);
+
+  const [shouldUpload, setShouldUpload] = useState(true);
 
   async function chatWithCoach(userMessage) {
     let conversationString = "";
@@ -72,6 +75,7 @@ export default function Report(props) {
         ...prevHistory,
         { type: "gpt", content: markdownToHTML(gptResponse) },
       ]);
+      setShouldUpload(true);
     } catch (error) {
       console.log(error);
     }
@@ -184,6 +188,68 @@ export default function Report(props) {
     }
   }
 
+  async function uploadReport() {
+    const uid = localStorage.getItem("uid");
+    let conversationString = "";
+    if (conversationHistory[0]) {
+      conversationHistory.map((convo) => {
+        conversationString += convo.type + ": " + convo.content + "\n";
+      });
+    }
+
+    setShouldUpload(false);
+
+    const { data, error } = await props.db
+      .from("users")
+      .select()
+      .eq("uid", uid);
+
+    let newInterview = {
+      id: interviewID,
+      transcript: conversationString,
+      questions: leetcodeMatches,
+      report: {
+        overallScore: overallScore,
+        technicalScores: technicalScores,
+        verbalScores: verbalScores,
+        scoreDiscussion: scoreDiscussion,
+      },
+    };
+
+    if (data && data[0]) {
+      let update_package = [...data[0].interviews];
+
+      // Find the index of the existing interview with the same id
+      const index = update_package.findIndex(
+        (interview) => interview.id === newInterview.id
+      );
+
+      if (index !== -1) {
+        // If the interview exists, update it
+        update_package[index] = newInterview;
+      } else {
+        // If the interview doesn't exist, add it
+        update_package.push(newInterview);
+      }
+
+      await props.db
+        .from("users")
+        .update({
+          interviews: update_package,
+        })
+        .eq("uid", uid);
+    } else {
+      let update_package = [];
+
+      update_package.push(newInterview);
+
+      await props.db.from("users").insert({
+        uid: uid,
+        interviews: update_package,
+      });
+    }
+  }
+
   const markdownToHTML = (text) => {
     // Convert newline characters to <br>
     let formattedText = text.replace(/\n/g, "<br>");
@@ -273,6 +339,16 @@ export default function Report(props) {
     if (firstLoad) {
       setFirstLoad(false);
       generateReport();
+    }
+
+    if (
+      (verbalScores.length != 0) != [] &&
+      (technicalScores.length != 0) != [] &&
+      overallScore != 0 &&
+      scoreDiscussion.length != 0 &&
+      shouldUpload
+    ) {
+      uploadReport();
     }
 
     const handleResize = () => {

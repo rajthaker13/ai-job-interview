@@ -77,6 +77,13 @@ export default function Interview(props) {
     }
   };
 
+  function generateUniqueId() {
+    const timestamp = Date.now().toString(); // Get current timestamp as string
+    const randomString = Math.random().toString(36).substr(2, 5); // Generate random string
+    const uniqueId = timestamp + randomString; // Concatenate timestamp and random string
+    return uniqueId; // Extract first 10 characters to ensure 10-digit length
+  }
+
   // Determine difficulty color
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
@@ -147,10 +154,13 @@ export default function Interview(props) {
   };
 
   function endInterview() {
+    const interviewID = generateUniqueId();
+
     navigate("/report", {
       state: {
         conversationHistory: conversationHistory,
         leetcodeMatches: leetcodeMatches,
+        interviewID: interviewID,
       },
     });
   }
