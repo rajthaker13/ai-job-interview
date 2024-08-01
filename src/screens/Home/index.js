@@ -1,5 +1,5 @@
-import { TextInput } from "@tremor/react";
-import React, { useEffect, useState } from "react";
+import { Button } from "@tremor/react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import OpenAI from "openai";
 import { Pinecone } from "@pinecone-database/pinecone";
@@ -16,8 +16,10 @@ export default function Home(props) {
   const pinecone = new Pinecone({
     apiKey: process.env.REACT_APP_LINK_PINECONE_KEY,
   });
+
+  const navigate = useNavigate();
+
   const [jobDescription, setJobDescription] = useState("");
-  const [leetcodeMatches, setLeetodeMatches] = useState([]);
 
   async function getLeetcodeProblems() {
     const embedding = await openai.embeddings.create({
@@ -29,7 +31,7 @@ export default function Home(props) {
     const ns1 = index.namespace("version-1");
 
     const matchingProblems = await ns1.query({
-      topK: 5,
+      topK: 1,
       vector: embedding.data[0].embedding,
       includeMetadata: true,
       filter: {
@@ -37,10 +39,10 @@ export default function Home(props) {
       },
     });
 
-    console.log("Matching problems", matchingProblems);
-    setLeetodeMatches(matchingProblems.matches);
     setJobDescription("");
+    navigate("/interview", { state: matchingProblems.matches });
   }
+
   return (
     <div className="flex justify-center align-middle text-center h-[100vh] bg-[#05050D]">
       <div className="text-center text-white flex flex-col items-center">
@@ -60,17 +62,6 @@ export default function Home(props) {
         >
           Submit
         </button>
-      </div>
-      <div className="h-[50vh] overflow-scroll">
-        {leetcodeMatches.map((question) => {
-          return (
-            <div>
-              <br />
-              <p>{`${question.metadata.title}: ${question.metadata.description}`}</p>
-              <br />
-            </div>
-          );
-        })}
       </div>
     </div>
   );
