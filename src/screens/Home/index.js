@@ -5,7 +5,6 @@ import { Pinecone } from "@pinecone-database/pinecone";
 import automock from "../../assets/logo.png";
 import favicon from "../../assets/favicon.png";
 import coderoyale from "../../assets/coderoyale.png";
-import { Button, Navbar } from "flowbite-react";
 
 export default function Home(props) {
   const openai = new OpenAI({
