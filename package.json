@@ -8,6 +8,8 @@
     "@monaco-editor/react": "^4.6.0",
     "@pinecone-database/pinecone": "^2.1.0",
     "@remixicon/react": "^4.2.0",
+    "@supabase/auth-ui-react": "^0.4.7",
+    "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.44.4",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
