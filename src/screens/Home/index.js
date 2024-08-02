@@ -42,7 +42,7 @@ export default function Home(props) {
   }
 
   return (
-    <div className="flex justify-center align-middle text-center h-[100vh] bg-[#05050D]">
+    <div className="flex justify-center items-center text-center h-[90vh] bg-[#05050D]">
       <div className="text-center text-white flex flex-col items-center">
         <p>Enter job description</p>
         <textarea

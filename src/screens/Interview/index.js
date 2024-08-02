@@ -215,7 +215,7 @@ export default function Interview(props) {
           stopYResizing();
         }
       }}
-      style={{ height: "100vh", width: "100vw" }}
+      style={{ height: "90vh", width: "100vw" }}
     >
       <div
         className="bg-neutral-800 rounded-lg overflow-y-scroll overflow-x-hidden border border-neutral-700 p-4 ml-4 mt-3 mb-3"
