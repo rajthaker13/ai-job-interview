@@ -2,6 +2,7 @@ import { TextInput } from "@tremor/react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import automock from "../../assets/logo.png";
+import coderoyale from "../../assets/coderoyale.png";
 
 export default function Login(props) {
   const [email, setEmail] = useState("");
@@ -57,7 +58,7 @@ export default function Login(props) {
       <div className=" h-[auto] py-80 rounded-lg w-[20vw]">
         <div className="">
           <img
-            src={automock}
+            src={coderoyale}
             className="object-contain w-[100%] h-[5vh] justify-center content-center mb-5"
           />
           <span className="text-center text-tremor-title text-white font-semibold text-tremor-content-strong dark:text-dark-tremor-content-strong leading-[1px]">

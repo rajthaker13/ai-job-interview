@@ -5,6 +5,7 @@
   "dependencies": {
     "@headlessui/react": "^2.1.2",
     "@headlessui/tailwindcss": "^0.2.1",
+    "@monaco-editor/react": "^4.6.0",
     "@pinecone-database/pinecone": "^2.1.0",
     "@remixicon/react": "^4.2.0",
     "@supabase/auth-ui-react": "^0.4.7",
@@ -15,11 +16,14 @@
     "@testing-library/user-event": "^13.5.0",
     "@tremor/react": "^3.17.4",
     "axios": "^1.7.2",
+    "monaco-themes": "^0.4.4",
     "openai": "^4.52.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.25.1",
     "react-scripts": "5.0.1",
+    "react-select": "^5.8.0",
+    "react-toastify": "^10.0.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -48,6 +52,7 @@
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.7",
+    "daisyui": "^4.12.10",
     "tailwindcss": "^3.4.6"
   }
 }
