@@ -14,6 +14,7 @@ export default function Interview(props) {
   const navigate = useNavigate();
 
   const [problemWidth, setProblemWidth] = useState(40);
+  const [editorWidth, setEditorWidth] = useState(60);
   const [ideHeight, setIdeHeight] = useState(50);
   const [conversationHistory, setConversationHistory] = useState([]);
 
@@ -51,11 +52,13 @@ export default function Interview(props) {
   const resize = (e) => {
     if (isXResizing.current) {
       const deltaX = e.clientX - startX.current;
-      const newWidth = Math.max(
-        15,
-        Math.min(65, problemWidth + (deltaX / window.innerWidth) * 80)
+      const newProblemWidth = Math.max(
+        20,
+        Math.min(70, problemWidth + (deltaX / window.innerWidth) * 100)
       );
-      setProblemWidth(newWidth);
+      const newEditorWidth = 100 - newProblemWidth;
+      setProblemWidth(newProblemWidth);
+      setEditorWidth(newEditorWidth);
       startX.current = e.clientX;
     }
     if (isYResizing.current) {
@@ -205,160 +208,147 @@ export default function Interview(props) {
   };
 
   return (
-    //TODO: Compiler Code for Matteo to fit into interview UI
-    <Compiler />
-    //Below is current code for Interview UI without Compiler...
-    // <div
-    //   className="bg-neutral-900 text-white flex"
-    //   onMouseMove={resize}
-    //   onMouseUp={() => {
-    //     if (isXResizing) {
-    //       stopXResizing();
-    //     }
-    //     if (isYResizing) {
-    //       stopYResizing();
-    //     }
-    //   }}
-    //   style={{ height: "90vh", width: "100vw" }}
-    // >
-    //   <div
-    //     className="bg-neutral-800 rounded-lg overflow-y-scroll overflow-x-hidden border border-neutral-700 p-4 ml-4 mt-3 mb-3"
-    //     style={{ width: `${problemWidth}%` }}
-    //   >
-    //     {leetcodeMatches.map((question) => {
-    //       const { title, difficulty, description, url, related_topics } =
-    //         question.metadata;
+    <div
+      className="bg-[#05050D] text-white flex flex-row"
+      onMouseMove={resize}
+      onMouseUp={() => {
+        if (isXResizing) {
+          stopXResizing();
+        }
+        if (isYResizing) {
+          stopYResizing();
+        }
+      }}
+      style={{ height: "92vh", width: "100vw" }}
+    >
+      <div
+        className="bg-neutral-800 rounded-lg overflow-y-auto border border-neutral-700 p-4 mt-3 mb-3 ml-4"
+        style={{ width: `${problemWidth}%`, minWidth: "20%" }}
+      >
+        {leetcodeMatches.map((question) => {
+          const { title, difficulty, description, url, related_topics } =
+            question.metadata;
 
-    //       return (
-    //         <div key={title} className="mb-4">
-    //           <h2 className="text-xl font-bold pb-1">{title}</h2>
-    //           <div className="flex pb-3">
-    //             <p
-    //               className={`${getDifficultyColor(
-    //                 difficulty
-    //               )} font-bold pr-2 text-base mt-0.5`}
-    //             >
-    //               {difficulty}
-    //             </p>
-    //             <TopicDropdown topics={related_topics} />
-    //           </div>
-    //           <p
-    //             dangerouslySetInnerHTML={{
-    //               __html: formatDescription(description),
-    //             }}
-    //           ></p>
-    //           <br></br>
-    //           <a
-    //             href={url}
-    //             className="text-blue-400 underline"
-    //             target="_blank"
-    //             rel="noopener noreferrer"
-    //           >
-    //             View on Leetcode
-    //           </a>
-    //           <br></br>
-    //         </div>
-    //       );
-    //     })}
-    //   </div>
-    //   <div
-    //     className="vertical-bar absolute rounded w-0.5 h-[97%] bg-neutral-700 hover:bg-blue-500 cursor-col-resize mt-3 mb-3"
-    //     style={{ left: `${problemWidth}%` }}
-    //     onMouseDown={startXResizing}
-    //   ></div>
-    //   <div className="flex flex-col flex-grow">
-    //     <div
-    //       className="rounded-lg bg-neutral-800 border border-neutral-700 ml-2.5 mb-1.5 mt-3 mr-4"
-    //       style={{ height: `${ideHeight}%` }}
-    //     >
-    //       <button
-    //         style={{
-    //           backgroundColor: "#FF4D4D",
-    //           color: "white",
-    //           borderRadius: "8px",
-    //           padding: "6px 12px",
-    //           border: "none",
-    //           fontSize: "13px",
-    //         }}
-    //         onClick={() => {
-    //           endInterview();
-    //         }}
-    //       >
-    //         End Interview
-    //       </button>
-    //     </div>
-    //     <div
-    //       className="rounded h-0.5 bg-neutral-700 hover:bg-blue-500 cursor-row-resize ml-3 mr-5 mb-1.5"
-    //       onMouseDown={startYResizing}
-    //     ></div>
-    //     <div
-    //       className="relative rounded-lg bg-neutral-800 border border-neutral-700 ml-2.5 mb-3 mr-4"
-    //       style={{
-    //         height: `${100 - ideHeight}%`,
-    //         width: `${100 - problemWidth}vw`,
-    //       }}
-    //     >
-    //       <div
-    //         className="p-2 overflow-y-auto"
-    //         style={{ height: "calc(100% - 60px)" }}
-    //       >
-    //         {conversationHistory.map((msg, index) => (
-    //           <div
-    //             key={index}
-    //             className={`py-1 whitespace-pre-wrap break-words ${
-    //               msg.type === "gpt" ? "text-blue-300" : "text-green-300"
-    //             }`}
-    //           >
-    //             {msg.content}
-    //           </div>
-    //         ))}
-    //       </div>
-    //       <div className="absolute bottom-0 left-0 w-full p-2 bg-neutral-800">
-    //         <input
-    //           onKeyDown={async (event) => {
-    //             if (event.key === "Enter") {
-    //               event.preventDefault();
-    //               let temp = event.target.value;
-    //               event.target.value = "";
-    //               setConversationHistory((prevHistory) => [
-    //                 ...prevHistory,
-    //                 { type: "user", content: temp },
-    //               ]);
-    //               await promptGPT(temp);
-    //             }
-    //           }}
-    //           className="w-full p-2 rounded-lg border border-neutral-700 bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-    //           placeholder="Talk to your interviewer..."
-    //           style={{ "--placeholder-color": "#a0aec0" }}
-    //         />
-    //       </div>
-    //     </div>
-    //   </div>
-    //   <style jsx>{`
-    //     code {
-    //       background-color: #333;
-    //       border-radius: 5px;
-    //       padding: 2px 5px;
-    //       font-family: "Courier New", Courier, monospace;
-    //       color: #e0e0e0;
-    //     }
-    //     .no-select {
-    //       user-select: none;
-    //     }
-    //     .overflow-y-scroll {
-    //       overflow-y: scroll;
-    //     }
-    //     .overflow-x-hidden {
-    //       overflow-x: hidden;
-    //       word-wrap: break-word;
-    //     }
-    //     .vertical-bar {
-    //       margin-left: -22px;
-    //     }
-    //     input::placeholder {
-    //       color: var(--placeholder-color);
-    //     }
-    //   `}</style>
-    // </div>
+          return (
+            <div key={title} className="mb-4">
+              <h2 className="text-xl font-bold pb-1">{title}</h2>
+              <div className="flex pb-3">
+                <p
+                  className={`${getDifficultyColor(
+                    difficulty
+                  )} font-bold pr-2 text-base mt-0.5`}
+                >
+                  {difficulty}
+                </p>
+                <TopicDropdown topics={related_topics} />
+              </div>
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: formatDescription(description),
+                }}
+              ></p>
+              <br></br>
+              <a
+                href={url}
+                className="text-blue-400 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View on Leetcode
+              </a>
+              <br></br>
+            </div>
+          );
+        })}
+      </div>
+      <div
+        className="vertical-bar absolute rounded w-0.5 h-[89vh] bg-neutral-700 hover:bg-blue-500 cursor-col-resize mt-3 mb-3"
+        style={{
+          left: `${problemWidth}%`,
+        }}
+        onMouseDown={startXResizing}
+      ></div>
+      <div
+        className="flex flex-col flex-grow mr-4"
+        style={{ width: `${editorWidth}%`, minWidth: "20%" }}
+      >
+        <div
+          className="rounded-lg bg-neutral-800 border border-neutral-700 ml-2.5 mb-1.5 mt-3"
+          style={{ height: `${ideHeight}%` }}
+        >
+          <Compiler
+            editorHeight={0.8 * ideHeight}
+            editorWidth={editorWidth - 10}
+          />
+        </div>
+        <div
+          className="rounded h-0.5 bg-neutral-700 hover:bg-blue-500 cursor-row-resize ml-3 mb-1.5"
+          onMouseDown={startYResizing}
+        ></div>
+        <div
+          className="relative rounded-lg bg-neutral-800 border border-neutral-700 ml-2.5 mb-3"
+          style={{
+            height: `${100 - ideHeight}%`,
+          }}
+        >
+          <div
+            className="p-2 overflow-y-auto"
+            style={{ height: "calc(100% - 60px)" }}
+          >
+            {conversationHistory.map((msg, index) => (
+              <div
+                key={index}
+                className={`py-1 whitespace-pre-wrap break-words ${
+                  msg.type === "gpt" ? "text-blue-300" : "text-green-300"
+                }`}
+              >
+                {msg.content}
+              </div>
+            ))}
+          </div>
+          <div className="absolute rounded-lg bottom-0 left-0 w-full p-2 bg-neutral-800">
+            <input
+              onKeyDown={async (event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  let temp = event.target.value;
+                  event.target.value = "";
+                  setConversationHistory((prevHistory) => [
+                    ...prevHistory,
+                    { type: "user", content: temp },
+                  ]);
+                  await promptGPT(temp);
+                }
+              }}
+              className="w-full p-2 rounded-lg border border-neutral-700 bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Talk to your interviewer..."
+              style={{ "--placeholder-color": "#a0aec0" }}
+            />
+          </div>
+        </div>
+      </div>
+      <style jsx>{`
+        code {
+          background-color: #333;
+          border-radius: 5px;
+          padding: 2px 5px;
+          font-family: "Courier New", Courier, monospace;
+          color: #e0e0e0;
+        }
+        .no-select {
+          user-select: none;
+        }
+        .overflow-y-scroll {
+          overflow-y: scroll;
+        }
+        .overflow-x-hidden {
+          overflow-x: hidden;
+          word-wrap: break-word;
+        }
+        input::placeholder {
+          color: var(--placeholder-color);
+        }
+      `}</style>
+    </div>
   );
 }
