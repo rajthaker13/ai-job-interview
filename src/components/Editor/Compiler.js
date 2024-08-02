@@ -201,7 +201,7 @@ const Compiler = () => {
   };
 
   return (
-    <>
+    <div className="bg-neutral-900">
       <div className="h-4 w-full"></div>
       <div className="flex flex-row">
         <div className="px-4 py-2">
@@ -242,7 +242,7 @@ const Compiler = () => {
           {outputDetails && <OutputDetails outputDetails={outputDetails} />}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 export default Compiler;
