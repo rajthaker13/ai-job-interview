@@ -6,6 +6,7 @@ import Home from "./screens/Home";
 import Interview from "./screens/Interview";
 import Report from "./screens/Report";
 import Profile from "./screens/Profile";
+import Header from "./components/Header";
 
 function App() {
   const supabaseUrl = "https://twqwiryumiolecfebqtd.supabase.co";
@@ -15,6 +16,7 @@ function App() {
 
   return (
     <Router>
+      <Header />
       <Routes>
         <Route path="/" element={<Login db={supabase} isNewAccount={true} />} />
         <Route

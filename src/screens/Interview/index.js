@@ -3,6 +3,7 @@ import { TextInput, Button } from "@tremor/react";
 import { RiSearch2Line } from "@remixicon/react";
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import Compiler from "../../components/Editor/Compiler";
 import gptPic from "../../assets/favicon.png";
 import userPic from "../../assets/user.png";
 
@@ -239,65 +240,61 @@ export default function Interview(props) {
   };
 
   return (
-    <div
-      className="bg-[#05050D] text-white flex"
-      onMouseMove={resize}
-      onMouseUp={() => {
-        if (isXResizing) {
-          stopXResizing();
-        }
-        if (isYResizing) {
-          stopYResizing();
-        }
-      }}
-      style={{ height: "100vh", width: "100vw" }}
-    >
-      <div
-        className={`bg-neutral-800 rounded-lg overflow-y-auto border ${
-          selectedDiv === "problem"
-            ? "border-neutral-500"
-            : "border-neutral-700"
-        } p-4 ml-4 mt-3 mb-3`}
-        style={{ width: `${problemWidth}%` }}
-        onClick={() => setSelectedDiv("problem")}
-      >
-        {leetcodeMatches &&
-          leetcodeMatches[0] &&
-          leetcodeMatches.map((question) => {
-            const { title, difficulty, description, url, related_topics } =
-              question.metadata;
+    //TODO: Compiler Code for Matteo to fit into interview UI
+    <Compiler />
+    //Below is current code for Interview UI without Compiler...
+    // <div
+    //   className="bg-neutral-900 text-white flex"
+    //   onMouseMove={resize}
+    //   onMouseUp={() => {
+    //     if (isXResizing) {
+    //       stopXResizing();
+    //     }
+    //     if (isYResizing) {
+    //       stopYResizing();
+    //     }
+    //   }}
+    //   style={{ height: "90vh", width: "100vw" }}
+    // >
+    //   <div
+    //     className="bg-neutral-800 rounded-lg overflow-y-scroll overflow-x-hidden border border-neutral-700 p-4 ml-4 mt-3 mb-3"
+    //     style={{ width: `${problemWidth}%` }}
+    //   >
+    //     {leetcodeMatches.map((question) => {
+    //       const { title, difficulty, description, url, related_topics } =
+    //         question.metadata;
 
-            return (
-              <div key={title} className="mb-4">
-                <h2 className="text-xl font-bold pb-1">{title}</h2>
-                <div className="flex pb-3">
-                  <p
-                    className={`${getDifficultyColor(
-                      difficulty
-                    )} font-bold pr-2 text-base mt-0.5`}
-                  >
-                    {difficulty}
-                  </p>
-                  <TopicDropdown topics={related_topics} />
-                </div>
+          return (
+            <div key={title} className="mb-4">
+              <h2 className="text-xl font-bold pb-1">{title}</h2>
+              <div className="flex pb-3">
                 <p
-                  dangerouslySetInnerHTML={{
-                    __html: markdownToHTML(description),
-                  }}
-                ></p>
-                <br></br>
-                <a
-                  href={url}
-                  className="text-blue-400 underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  className={`${getDifficultyColor(
+                    difficulty
+                  )} font-bold pr-2 text-base mt-0.5`}
                 >
-                  View on Leetcode
-                </a>
-                <br></br>
+                  {difficulty}
+                </p>
+                <TopicDropdown topics={related_topics} />
               </div>
-            );
-          })}
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: formatDescription(description),
+                }}
+              ></p>
+              <br></br>
+              <a
+                href={url}
+                className="text-blue-400 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View on Leetcode
+              </a>
+              <br></br>
+            </div>
+          );
+        })}
       </div>
       <div
         className="vertical-bar absolute rounded w-0.5 h-[97%] bg-neutral-700 hover:bg-blue-500 cursor-col-resize mt-3 mb-3"
@@ -306,11 +303,8 @@ export default function Interview(props) {
       ></div>
       <div className="flex flex-col flex-grow">
         <div
-          className={`rounded-lg bg-neutral-800 border ${
-            selectedDiv === "ide" ? "border-neutral-500" : "border-neutral-700"
-          } ml-2.5 mb-1.5 mt-3 mr-4 p-4`}
+          className="rounded-lg bg-neutral-800 border border-neutral-700 ml-2.5 mb-1.5 mt-3 mr-4"
           style={{ height: `${ideHeight}%` }}
-          onClick={() => setSelectedDiv("ide")}
         >
           <button
             style={{
@@ -333,53 +327,28 @@ export default function Interview(props) {
           onMouseDown={startYResizing}
         ></div>
         <div
-          className={`relative rounded-lg bg-neutral-800 border ${
-            selectedDiv === "conversation"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-          } ml-2.5 mb-3 mr-4`}
+          className="relative rounded-lg bg-neutral-800 border border-neutral-700 ml-2.5 mb-3 mr-4"
           style={{
             height: `${100 - ideHeight}%`,
             width: `${100 - problemWidth}vw`,
           }}
-          onClick={() => setSelectedDiv("conversation")}
         >
           <div
-            className="p-2 overflow-y-auto text-lg"
+            className="p-2 overflow-y-auto"
             style={{ height: "calc(100% - 60px)" }}
           >
             {conversationHistory.map((msg, index) => (
-              <div className="flex mb-3">
-                <img
-                  className="mr-3 mt-0.5"
-                  src={msg.type == "gpt" ? gptPic : userPic}
-                  style={{
-                    width: "30px",
-                    height: "30px",
-                    borderRadius: "50%",
-                  }}
-                />
-                <p
-                  key={index}
-                  dangerouslySetInnerHTML={{
-                    __html: msg.content,
-                  }}
-                  className={`py-1 whitespace-pre-wrap break-words ${
-                    msg.type === "gpt" ? "text-blue-300" : "text-white-300"
-                  }`}
-                ></p>
+              <div
+                key={index}
+                className={`py-1 whitespace-pre-wrap break-words ${
+                  msg.type === "gpt" ? "text-blue-300" : "text-green-300"
+                }`}
+              >
+                {msg.content}
               </div>
             ))}
           </div>
-          <div
-            className="absolute bottom-0 left-0 w-full p-2 bg-neutral-800"
-            style={{
-              borderTopLeftRadius: "0px",
-              borderTopRightRadius: "0px",
-              borderBottomRightRadius: "10px",
-              borderBottomLeftRadius: "10px",
-            }}
-          >
+          <div className="absolute bottom-0 left-0 w-full p-2 bg-neutral-800">
             <input
               onKeyDown={async (event) => {
                 if (event.key === "Enter") {
@@ -395,9 +364,7 @@ export default function Interview(props) {
               }}
               className="w-full p-2 rounded-lg border border-neutral-700 bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Talk to your interviewer..."
-              style={{
-                "--placeholder-color": "#a0aec0",
-              }}
+              style={{ "--placeholder-color": "#a0aec0" }}
             />
           </div>
         </div>
@@ -412,6 +379,13 @@ export default function Interview(props) {
         }
         .no-select {
           user-select: none;
+        }
+        .overflow-y-scroll {
+          overflow-y: scroll;
+        }
+        .overflow-x-hidden {
+          overflow-x: hidden;
+          word-wrap: break-word;
         }
         .vertical-bar {
           margin-left: -22px;
