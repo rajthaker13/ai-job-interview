@@ -45,10 +45,10 @@ export default function Header(props) {
             </li>
           </ul>
         </div>
-        <img src={coderoyale} className="object-contain w-[10vw]" />
+        <img src={coderoyale} className="object-contain w-[10vw] ml-[1vw]" />
       </div>
       <div className="navbar-center hidden lg:flex">
-        <ul className="menu menu-horizontal px-1">
+        {/* <ul className="menu menu-horizontal px-1">
           <li>
             <a>Item 1</a>
           </li>
@@ -58,7 +58,7 @@ export default function Header(props) {
           <li>
             <a>Item 3</a>
           </li>
-        </ul>
+        </ul> */}
       </div>
       <div className="navbar-end">{/* <a className="btn">Button</a> */}</div>
     </div>
