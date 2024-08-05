@@ -222,7 +222,7 @@ export default function Interview(props) {
       style={{ height: "92vh", width: "100vw" }}
     >
       <div
-        className="bg-neutral-800 rounded-lg overflow-y-auto border border-neutral-700 p-4 mt-3 mb-3 ml-4"
+        className="bg-neutral-800 rounded-lg overflow-y-auto border border-neutral-700 p-4 ml-3 my-3"
         style={{ width: `${problemWidth}%`, minWidth: "20%" }}
       >
         {leetcodeMatches.map((question) => {
@@ -262,18 +262,18 @@ export default function Interview(props) {
         })}
       </div>
       <div
-        className="vertical-bar absolute rounded w-0.5 h-[89vh] bg-neutral-700 hover:bg-blue-500 cursor-col-resize mt-3 mb-3"
+        className="vertical-bar rounded w-0.5 h-[89vh] bg-neutral-700 hover:bg-blue-500 cursor-col-resize ml-1.5 mt-3 mb-3"
         style={{
           left: `${problemWidth}%`,
         }}
         onMouseDown={startXResizing}
       ></div>
       <div
-        className="flex flex-col flex-grow mr-4"
+        className="flex flex-col flex-grow mr-3"
         style={{ width: `${editorWidth}%`, minWidth: "20%" }}
       >
         <div
-          className="rounded-lg bg-neutral-800 border border-neutral-700 ml-2.5 mb-1.5 mt-3"
+          className="rounded-lg bg-neutral-800 border border-neutral-700 ml-1.5 mb-1.5 mt-3"
           style={{ height: `${ideHeight}%` }}
         >
           <Compiler
@@ -282,11 +282,11 @@ export default function Interview(props) {
           />
         </div>
         <div
-          className="rounded h-0.5 bg-neutral-700 hover:bg-blue-500 cursor-row-resize ml-3 mb-1.5"
+          className="rounded h-0.5 bg-neutral-700 hover:bg-blue-500 cursor-row-resize ml-2 mb-1.5"
           onMouseDown={startYResizing}
         ></div>
         <div
-          className="relative rounded-lg bg-neutral-800 border border-neutral-700 ml-2.5 mb-3"
+          className="relative rounded-lg bg-neutral-800 border border-neutral-700 ml-1.5 mb-3"
           style={{
             height: `${100 - ideHeight}%`,
           }}
