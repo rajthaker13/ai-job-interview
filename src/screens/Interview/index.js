@@ -17,7 +17,13 @@ export default function Interview(props) {
   const [problemWidth, setProblemWidth] = useState(40);
   const [editorWidth, setEditorWidth] = useState(60);
   const [ideHeight, setIdeHeight] = useState(50);
-  const [conversationHistory, setConversationHistory] = useState([]);
+  const [conversationHistory, setConversationHistory] = useState([
+    {
+      type: "gpt",
+      content:
+        "Hi, I'm Katie, and I'll be conducting your technical interview today. Let's get started! Please read over the problem and let me know if you have any clarifying questions. Remember to clearly explain your thought process throughout the interview. I'm here to help! Can you start by introducing yourself?",
+    },
+  ]);
   const [code, setCode] = useState("");
   const [outputDetails, setOutputDetails] = useState(null);
   const [language, setLanguage] = useState(languageOptions[0]);
@@ -175,8 +181,6 @@ export default function Interview(props) {
       model: "gpt-4o-mini",
     });
 
-    console.log(response);
-
     if (response.choices[0]) {
       setCode(response.choices[0].message.content);
     }
@@ -233,13 +237,35 @@ export default function Interview(props) {
     generateStarterCode();
   }, []);
 
-  /* useEffect(() => {
-    setConversationHistory((prevHistory) => [
-      ...prevHistory,
-      { type: "code", content: code },
-      { type: "output", content: outputDetails },
-    ]);
-  }, outputDetails);*/
+  useEffect(() => {
+    if (outputDetails && outputDetails.stdout) {
+      setConversationHistory((prevHistory) => [
+        ...prevHistory,
+        {
+          type: "code",
+          content: "Submitted Code (Compiled & Ran Successfully):\n",
+          code,
+        },
+        { type: "output", content: atob(outputDetails.stdout) },
+      ]);
+    } else if (outputDetails && outputDetails.stderr) {
+      setConversationHistory((prevHistory) => [
+        ...prevHistory,
+        {
+          type: "code",
+          content: "Submitted Code (Threw Error):\n",
+          code,
+        },
+        { type: "output", content: atob(outputDetails.stderr) },
+      ]);
+    }
+
+    if (outputDetails) {
+      promptGPT(
+        "The student just submitted code. The code and output is above. Analyze the correctness and time complexity of the code and discuss with the student."
+      );
+    }
+  }, [outputDetails]);
 
   // Component for the Topic Dropdown
   const TopicDropdown = ({ topics }) => {
@@ -327,7 +353,7 @@ export default function Interview(props) {
         onMouseDown={startXResizing}
       ></div>
       <div
-        className="flex flex-col flex-grow mr-3"
+        className="flex flex-col mr-3"
         style={{ width: `${editorWidth}%`, minWidth: "20%" }}
       >
         <div
@@ -350,27 +376,41 @@ export default function Interview(props) {
           onMouseDown={startYResizing}
         ></div>
         <div
-          className="relative rounded-lg bg-neutral-800 border border-neutral-700 ml-1.5 mb-3"
+          className="relative rounded-lg bg-neutral-800 border border-neutral-700 ml-1.5 mb-3 flex flex-col"
           style={{
-            height: `${100 - ideHeight}%`,
+            height: `${95 - ideHeight}%`,
           }}
         >
-          <div
-            className="p-2 overflow-y-auto"
-            style={{ height: "calc(100% - 60px)" }}
-          >
-            {conversationHistory.map((msg, index) => (
-              <div
-                key={index}
-                className={`py-1 whitespace-pre-wrap break-words ${
-                  msg.type === "gpt" ? "text-blue-300" : "text-green-300"
-                }`}
-              >
-                {msg.content}
-              </div>
-            ))}
+          <div className="p-2 overflow-y-auto flex-grow">
+            {conversationHistory.map((msg, index) => {
+              if (msg.type !== "code" && msg.type !== "output") {
+                return (
+                  <div
+                    key={index}
+                    className={`py-1 whitespace-pre-wrap break-words ${
+                      msg.type === "gpt" ? "text-blue-300" : "text-green-300"
+                    }`}
+                  >
+                    {msg.content}
+                  </div>
+                );
+              } else if (msg.type === "output") {
+                return (
+                  <div
+                    key={index}
+                    className={`py-1 whitespace-pre-wrap break-words ${
+                      msg.type === "gpt" ? "text-blue-300" : "text-green-300"
+                    }`}
+                  >
+                    {"OUTPUT: \n" + msg.content}
+                  </div>
+                );
+              } else {
+                return "";
+              }
+            })}
           </div>
-          <div className="absolute rounded-lg bottom-0 left-0 w-full p-2 bg-neutral-800">
+          <div className="rounded-lg bottom-0 left-0 w-full p-2 bg-neutral-800 flex-shrink-0">
             <input
               onKeyDown={async (event) => {
                 if (event.key === "Enter") {
