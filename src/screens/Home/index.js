@@ -2,6 +2,9 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import OpenAI from "openai";
 import { Pinecone } from "@pinecone-database/pinecone";
+import automock from "../../assets/logo.png";
+import favicon from "../../assets/favicon.png";
+import coderoyale from "../../assets/coderoyale.png";
 
 export default function Home(props) {
   const openai = new OpenAI({
@@ -39,15 +42,15 @@ export default function Home(props) {
   }
 
   return (
-    <div className="flex-col items-center justify-center mx-[10vw] h-[100vh]">
-      <div className="text-center mt-[30vh] flex flex-col items-center">
+    <div className="flex justify-center items-center text-center h-[90vh] bg-[#05050D]">
+      <div className="text-center text-white flex flex-col items-center">
         <p>Enter job description</p>
         <textarea
           value={jobDescription}
           onChange={(e) => {
             setJobDescription(e.target.value);
           }}
-          className="border rounded-md p-2 h-[20vh] w-[30vw] mt-4"
+          className="border rounded-md p-2 h-[20vh] w-[30vw] mt-4 text-black"
         ></textarea>
         <button
           onClick={async () => {
