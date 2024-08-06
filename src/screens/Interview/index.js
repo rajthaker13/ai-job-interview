@@ -5,6 +5,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { languageOptions } from "../../components/Editor/constants/languageOptions";
 import Compiler from "../../components/Editor/Compiler";
+import gptPic from "../../assets/favicon.png";
+import userPic from "../../assets/user.png";
 
 export default function Interview(props) {
   const openai = new OpenAI({
@@ -17,6 +19,7 @@ export default function Interview(props) {
   const [problemWidth, setProblemWidth] = useState(40);
   const [editorWidth, setEditorWidth] = useState(60);
   const [ideHeight, setIdeHeight] = useState(50);
+  const [selectedDiv, setSelectedDiv] = useState(null);
   const [conversationHistory, setConversationHistory] = useState([
     {
       type: "gpt",
@@ -82,6 +85,13 @@ export default function Interview(props) {
     }
   };
 
+  function generateUniqueId() {
+    const timestamp = Date.now().toString(); // Get current timestamp as string
+    const randomString = Math.random().toString(36).substr(2, 5); // Generate random string
+    const uniqueId = timestamp + randomString; // Concatenate timestamp and random string
+    return uniqueId; // Extract first 10 characters to ensure 10-digit length
+  }
+
   // Determine difficulty color
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
@@ -94,6 +104,39 @@ export default function Interview(props) {
       default:
         return "";
     }
+  };
+
+  // Function to convert Markdown-like text to HTML
+  const markdownToHTML = (text) => {
+    // Convert newline characters to <br>
+    let formattedText = text.replace(/\n/g, "<br>");
+
+    // Convert LaTeX delimiters for inline math
+    formattedText = formattedText.replace(/\\\((.*?)\\\)/g, "$1");
+    formattedText = formattedText.replace(/\\\[(.*?)\\\]/g, "$1");
+
+    // Convert bold text **text** to <b>text</b>
+    formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
+
+    // Convert italic text *text* to <i>text</i>
+    formattedText = formattedText.replace(/\*(.*?)\*/g, "<i>$1</i>");
+
+    // Make special phrases bold
+    formattedText = formattedText.replace(
+      /Example (\d+):/g,
+      "<b>Example $1:</b>"
+    );
+    formattedText = formattedText.replace(/Example:/g, "<b>Example:</b>");
+    formattedText = formattedText.replace(/Note:/g, "<b>Note:</b>");
+    formattedText = formattedText.replace(
+      /Constraints:/g,
+      "<b>Constraints:</b>"
+    );
+
+    // Convert `code` text to styled code
+    formattedText = formattedText.replace(/`(.*?)`/g, "<code>$1</code>");
+
+    return formattedText;
   };
 
   // Function to convert Markdown-like text to HTML
@@ -120,6 +163,8 @@ export default function Interview(props) {
     return formattedText;
   };
 
+  // Funct
+
   // Function to format the topics
   const formatTopics = (topics) => {
     if (topics == "NaN") {
@@ -143,7 +188,15 @@ export default function Interview(props) {
   };
 
   function endInterview() {
-    navigate("/report");
+    const interviewID = generateUniqueId();
+
+    navigate("/report", {
+      state: {
+        conversationHistory: conversationHistory,
+        leetcodeMatches: leetcodeMatches,
+        interviewID: interviewID,
+      },
+    });
   }
 
   async function generateStarterCode() {
@@ -193,21 +246,23 @@ export default function Interview(props) {
     });
 
     try {
-      const context = `Your name is Katie. You are a tech interviewer for a large software company. You are conducting a technical coding interview with a current or recently graduated university student. Begin the interview by introducing yourself.
-      You should only introduce yourself in your first message. If you have already introduced yourself, do not do it again.
+      const context = `Your name is Katie. You are a tech interviewer for a large software company. You are conducting a technical coding interview with a current or recently graduated university student.
       If the student has already given you some of their personal information, do not ask for it again.
       Here is the current conversation history. Use this as context: ${conversationString}
-      The problem given to the student is the following problem: ${leetcodeMatches[0].metadata.title}: ${leetcodeMatches[0].metadata.description}. 
+      The problem given to the student is the following problem: ${
+        leetcodeMatches ? leetcodeMatches[0].metadata.title : ""
+      } ${leetcodeMatches ? leetcodeMatches[0].metadata.description : ""}. 
       The student can see this problem and the visible test cases. You don't ever have to repeat the problem statement in its entirety. You can reference parts of it to answer questions though, of course.
       Consider the optimal solution to the problem. The optimal solution is the one that has the best time and space complexity.
       You are to act as an interviewer, not as AI helping the student. You may subtly nudge the student if their attempt is very far off from the correct answer, but let them do 90% of the work.
-      Let them fail if they cannot reach a solution. You are not meant to help the student, but to grade their ability.
+      Let them fail if they cannot reach a solution. You are not meant to help the student, but to grade their ability and engage in a discussion about the problem. Don't give hints unless the student asks for them.
       You should encourage the student to talk through their solution, discussing ideas and potential implementations.
       If the student submits code to you, you are to grade it using the test cases in the problem description as well as new test cases you come up with. You don't need to display the test cases, just comment on whether the code passed the test case or not.
+      Ask the student what they think the time and space complexity of their implementation is. Have a discussion about it, but do not give them the answer. They must come to the answer themselves.
       Run the students code and tell the student whether or not they passed all the test cases. If they did, but not optimally, ask if there is any room for time or space complexity improvement.
-      Ask the student what the time and space complexity of their implementation is if it works, and tell them whether they are correct or not.
       You should test all edge cases, check for compiler errors, runtime errors, and everything that would prevent the program from working correctly in an IDE.
-      If the student submits to you a question or asks for clarification on the problem, do you best to answer, but if the question simply asks you for an implementation or answer, state that that is the job of the student themself.`;
+      If the student submits to you a question or asks for clarification on the problem, do you best to answer, but if the question simply asks you for an implementation or answer, state that that is the job of the student themself.
+      Don't include any LaTex style characters in your response. You can only use markdown elements and regular characters.`;
 
       let userPrompt = [
         { role: "system", content: context },
@@ -226,7 +281,7 @@ export default function Interview(props) {
 
       setConversationHistory((prevHistory) => [
         ...prevHistory,
-        { type: "gpt", content: gptResponse },
+        { type: "gpt", content: markdownToHTML(gptResponse) },
       ]);
     } catch (error) {
       console.log(error);
