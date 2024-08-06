@@ -233,6 +233,14 @@ export default function Interview(props) {
     generateStarterCode();
   }, []);
 
+  /* useEffect(() => {
+    setConversationHistory((prevHistory) => [
+      ...prevHistory,
+      { type: "code", content: code },
+      { type: "output", content: outputDetails },
+    ]);
+  }, outputDetails);*/
+
   // Component for the Topic Dropdown
   const TopicDropdown = ({ topics }) => {
     const [isOpen, setIsOpen] = useState(false);
