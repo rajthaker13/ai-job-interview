@@ -24,13 +24,17 @@ export default function Report(props) {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { conversationHistory, leetcodeMatches } = location.state || {};
+  const { conversationHistory, leetcodeMatches, interviewID } =
+    location.state || {};
 
   const [technicalScores, setTechnicalScores] = useState([]);
   const [verbalScores, setVerbalScores] = useState([]);
   const [overallScore, setOverallScore] = useState(0);
   const [scoreDiscussion, setScoreDicussion] = useState([]);
-  const [firstLoad, setFirstLoad] = useState(true);
+  const [shouldGenerate, setShouldGenerate] = useState(false);
+
+  const [shouldUpload, setShouldUpload] = useState(false);
+  const [interviewIdx, setInterviewIdx] = useState(-1);
 
   async function chatWithCoach(userMessage) {
     let conversationString = "";
@@ -72,6 +76,7 @@ export default function Report(props) {
         ...prevHistory,
         { type: "gpt", content: markdownToHTML(gptResponse) },
       ]);
+      setShouldUpload(true);
     } catch (error) {
       console.log(error);
     }
@@ -170,6 +175,7 @@ export default function Report(props) {
         model: "gpt-4o",
       });
 
+      setShouldUpload(true);
       setScoreDicussion([
         ...scoreDiscussion,
         {
@@ -181,6 +187,112 @@ export default function Report(props) {
       ]);
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  async function uploadReport() {
+    const uid = localStorage.getItem("uid");
+    let conversationString = "";
+    if (conversationHistory[0]) {
+      conversationHistory.map((convo) => {
+        conversationString += convo.type + ": " + convo.content + "\n";
+      });
+    }
+
+    setShouldGenerate(false);
+
+    const { data, error } = await props.db
+      .from("users")
+      .select()
+      .eq("uid", uid);
+
+    let newInterview = {
+      date: new Date(),
+      id: interviewID,
+      transcript: conversationString,
+      questions: leetcodeMatches,
+      report: {
+        overallScore: overallScore,
+        technicalScores: technicalScores,
+        verbalScores: verbalScores,
+        scoreDiscussion: scoreDiscussion,
+      },
+    };
+
+    if (data && data[0]) {
+      let update_package = [...data[0].interviews];
+
+      // Find the index of the existing interview with the same id
+      const index = update_package.findIndex(
+        (interview) => interview.id === newInterview.id
+      );
+
+      if (index !== -1) {
+        // If the interview exists, update it
+        update_package[index] = newInterview;
+      } else {
+        // If the interview doesn't exist, add it
+        update_package.push(newInterview);
+      }
+
+      await props.db
+        .from("users")
+        .update({
+          interviews: update_package,
+        })
+        .eq("uid", uid);
+    } else {
+      let update_package = [];
+
+      update_package.push(newInterview);
+
+      await props.db.from("users").insert({
+        uid: uid,
+        interviews: update_package,
+      });
+    }
+  }
+
+  async function pullReport(interviewIdx) {
+    const uid = localStorage.getItem("uid");
+
+    const { data, error } = await props.db
+      .from("users")
+      .select()
+      .eq("uid", uid);
+
+    if (data && data[0]) {
+      let report = data[0].interviews[interviewIdx].report;
+      setOverallScore(parseInt(report.overallScore, 10));
+      setVerbalScores(report.verbalScores);
+      setTechnicalScores(report.technicalScores);
+      setScoreDicussion(report.scoreDiscussion);
+    }
+  }
+
+  async function isNewReport() {
+    const uid = localStorage.getItem("uid");
+
+    const { data, error } = await props.db
+      .from("users")
+      .select()
+      .eq("uid", uid);
+
+    if (data && data[0]) {
+      const index = data[0].interviews.findIndex(
+        (interview) => interview.id === interviewID
+      );
+
+      if (index == -1) {
+        setShouldGenerate(true);
+        setInterviewIdx(-1);
+      } else {
+        setShouldGenerate(false);
+        setInterviewIdx(index);
+      }
+    } else {
+      setShouldGenerate(false);
+      setInterviewIdx(-2);
     }
   }
 
@@ -270,9 +382,34 @@ export default function Report(props) {
   }
 
   useEffect(() => {
-    if (firstLoad) {
-      setFirstLoad(false);
-      generateReport();
+    isNewReport();
+  }, []);
+
+  useEffect(() => {
+    if (
+      verbalScores.length == 0 &&
+      technicalScores.length == 0 &&
+      overallScore == 0 &&
+      scoreDiscussion.length == 0
+    ) {
+      if (interviewIdx >= 0) {
+        pullReport(interviewIdx);
+      } else if (shouldGenerate) {
+        setShouldGenerate(false);
+        generateReport();
+      }
+    }
+
+    if (
+      verbalScores.length != 0 &&
+      technicalScores.length != 0 &&
+      overallScore != 0 &&
+      scoreDiscussion.length != 0 &&
+      shouldUpload
+    ) {
+      setShouldUpload(false);
+      setShouldGenerate(false);
+      uploadReport();
     }
 
     const handleResize = () => {
@@ -577,7 +714,7 @@ export default function Report(props) {
                       {problem.name}
                     </a>
                     <div
-                      className={`inline-block rounded-full bg-neutral-700 px-2 py-1 ${getDifficultyColor(
+                      className={`inline-block rounded-full font-bold bg-neutral-700 px-2 py-1 ${getDifficultyColor(
                         problem.level
                       )}`}
                     >

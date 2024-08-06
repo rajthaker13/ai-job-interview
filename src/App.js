@@ -5,6 +5,7 @@ import Login from "./screens/Login";
 import Home from "./screens/Home";
 import Interview from "./screens/Interview";
 import Report from "./screens/Report";
+import Profile from "./screens/Profile";
 import Header from "./components/Header";
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
         <Route path="/home" element={<Home db={supabase} />} />
         <Route path="/interview" element={<Interview db={supabase} />} />
         <Route path="/report" element={<Report db={supabase} />} />
+        <Route path="/profile" element={<Profile db={supabase} />} />
       </Routes>
     </Router>
   );
