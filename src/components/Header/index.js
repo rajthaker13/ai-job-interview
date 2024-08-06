@@ -3,7 +3,7 @@ import coderoyale from "../../assets/coderoyale.png";
 
 export default function Header(props) {
   return (
-    <div className="navbar bg-[#05050D] h-[10vh]">
+    <div className="navbar bg-[#05050D] h-[8vh]">
       <div className="navbar-start">
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
