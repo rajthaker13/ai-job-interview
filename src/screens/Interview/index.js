@@ -3,6 +3,7 @@ import { TextInput, Button } from "@tremor/react";
 import { RiSearch2Line } from "@remixicon/react";
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { languageOptions } from "../../components/Editor/constants/languageOptions";
 import Compiler from "../../components/Editor/Compiler";
 
 export default function Interview(props) {
@@ -17,6 +18,9 @@ export default function Interview(props) {
   const [editorWidth, setEditorWidth] = useState(60);
   const [ideHeight, setIdeHeight] = useState(50);
   const [conversationHistory, setConversationHistory] = useState([]);
+  const [code, setCode] = useState("");
+  const [outputDetails, setOutputDetails] = useState(null);
+  const [language, setLanguage] = useState(languageOptions[0]);
 
   const isXResizing = useRef(false);
   const startX = useRef(0);
@@ -136,6 +140,48 @@ export default function Interview(props) {
     navigate("/report");
   }
 
+  async function generateStarterCode() {
+    const context = `You are conducting a software engineering interview for a software company. 
+    Generate starter code that will be present in the IDE on load for the candidate to code in. 
+    It should contain an aptly titled function as well as a print statement with 2 or 3 pre-loaded test cases so the candidate may see the output.
+    The starter code should be in the following language: ${language.name}.
+
+    Here is an example of starter code and a test case for problem Binary Search. 
+    /**
+    * Problem: Binary Search: Search a sorted array for a target value.
+    */
+
+    function binarySearch(arr, target) {
+      /*
+      * Your code here
+      */
+    };
+
+    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const target = 5;
+    console.log(binarySearch(arr, target));`;
+
+    let prompt = [
+      { role: "system", content: context },
+      {
+        role: "user",
+        content: `This is the problem the candidate will be required to solve: ${leetcodeMatches[0].metadata.title}: ${leetcodeMatches[0].metadata.description}.
+        Generate start code for this problem in the target language. Return only the code and nothing else so that it will compile and have no syntax errors. Don't add any markdown elements for styling. Just a string.`,
+      },
+    ];
+
+    const response = await openai.chat.completions.create({
+      messages: prompt,
+      model: "gpt-4o-mini",
+    });
+
+    console.log(response);
+
+    if (response.choices[0]) {
+      setCode(response.choices[0].message.content);
+    }
+  }
+
   async function promptGPT(userMessage) {
     let conversationString = "";
     conversationHistory.map((convo) => {
@@ -182,6 +228,10 @@ export default function Interview(props) {
       console.log(error);
     }
   }
+
+  useEffect(() => {
+    generateStarterCode();
+  }, []);
 
   // Component for the Topic Dropdown
   const TopicDropdown = ({ topics }) => {
@@ -279,6 +329,12 @@ export default function Interview(props) {
           <Compiler
             editorHeight={0.8 * ideHeight}
             editorWidth={editorWidth - 10}
+            code={code}
+            setCode={setCode}
+            language={language}
+            setLanguage={setLanguage}
+            outputDetails={outputDetails}
+            setOutputDetails={setOutputDetails}
           />
         </div>
         <div
