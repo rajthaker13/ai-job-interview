@@ -136,6 +136,26 @@ export default function Interview(props) {
     // Convert `code` text to styled code
     formattedText = formattedText.replace(/`(.*?)`/g, "<code>$1</code>");
 
+    // Convert Markdown headers to HTML headers
+    formattedText = formattedText.replace(
+      /###### (.*?)(<br>|$)/g,
+      "<h6>$1</h6>$2"
+    );
+    formattedText = formattedText.replace(
+      /##### (.*?)(<br>|$)/g,
+      "<h5>$1</h5>$2"
+    );
+    formattedText = formattedText.replace(
+      /#### (.*?)(<br>|$)/g,
+      "<h4>$1</h4>$2"
+    );
+    formattedText = formattedText.replace(
+      /### (.*?)(<br>|$)/g,
+      "<h3>$1</h3>$2"
+    );
+    formattedText = formattedText.replace(/## (.*?)(<br>|$)/g, "<h2>$1</h2>$2");
+    formattedText = formattedText.replace(/# (.*?)(<br>|$)/g, "<h1>$1</h1>$2");
+
     return formattedText;
   };
 
@@ -202,8 +222,10 @@ export default function Interview(props) {
     Generate starter code that will be present in the IDE on load for the candidate to code in. 
     It should contain an aptly titled function as well as a print statement with 2 or 3 pre-loaded test cases so the candidate may see the output.
     The starter code should be in the following language: ${language.name}.
+    Include common import/library statements so the candidate can use Lists, HashMaps, HashSets, Stacks, Queues, and other common data structures. 
+    If the language is Java, the class should be named "Main".
 
-    Here is an example of starter code and a test case for problem Binary Search. 
+    Here is an example of starter code in JavaScript and a test case for problem Binary Search. 
     /**
     * Problem: Binary Search: Search a sorted array for a target value.
     */
@@ -311,6 +333,15 @@ export default function Interview(props) {
           content: "Submitted Code (Threw Error):\n" + code,
         },
         { type: "error", content: atob(outputDetails.stderr) },
+      ]);
+    } else if (outputDetails && outputDetails.compile_output) {
+      setConversationHistory((prevHistory) => [
+        ...prevHistory,
+        {
+          type: "code",
+          content: "Submitted Code (Threw Error):\n" + code,
+        },
+        { type: "error", content: atob(outputDetails.compile_output) },
       ]);
     }
 
@@ -521,6 +552,35 @@ export default function Interview(props) {
         }
         input::placeholder {
           color: var(--placeholder-color);
+        }
+        h1 {
+          font-size: 1.75em;
+          font-weight: bold;
+        }
+
+        h2 {
+          font-size: 1.5em;
+          font-weight: bold;
+        }
+
+        h3 {
+          font-size: 1.25em;
+          font-weight: bold;
+        }
+
+        h4 {
+          font-size: 1em;
+          font-weight: bold;
+        }
+
+        h5 {
+          font-size: 0.875em;
+          font-weight: bold;
+        }
+
+        h6 {
+          font-size: 0.75em;
+          font-weight: bold;
         }
       `}</style>
     </div>
