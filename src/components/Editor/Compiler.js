@@ -21,6 +21,8 @@ const Compiler = ({
   setLanguage,
   outputDetails,
   setOutputDetails,
+  questionIndex,
+  setQuestionIndex,
   endInterview,
 }) => {
   //TODO: Edit JavascriptDefault to reflect cur problem, also need to have code for other languages on language change...
@@ -198,20 +200,33 @@ const Compiler = ({
               {processing ? "Processing..." : "Compile and Execute"}
             </button>
             <button
-              style={{
-                backgroundColor: "#FF4D4D",
-                color: "white",
-                borderRadius: "8px",
-                padding: "6px 12px",
-                border: "none",
-                fontSize: "13px",
-                marginLeft: "15px",
-              }}
+              className={`${
+                questionIndex < 2
+                  ? "z-10 rounded-md ml-3 px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 flex-shrink-0"
+                  : ""
+              }`}
+              style={
+                questionIndex == 2
+                  ? {
+                      backgroundColor: "#FF4D4D",
+                      color: "white",
+                      borderRadius: "8px",
+                      padding: "6px 12px",
+                      border: "none",
+                      fontSize: "13px",
+                      marginLeft: "15px",
+                    }
+                  : {}
+              }
               onClick={() => {
-                endInterview();
+                if (questionIndex == 2) {
+                  endInterview();
+                } else {
+                  setQuestionIndex(questionIndex + 1);
+                }
               }}
             >
-              End Interview
+              {questionIndex < 2 ? "Next Question" : "End Interview"}
             </button>
           </div>
 
