@@ -67,7 +67,7 @@ export default function Interview(props) {
       const deltaX = e.clientX - startX.current;
       const newProblemWidth = Math.max(
         20,
-        Math.min(70, problemWidth + (deltaX / window.innerWidth) * 100)
+        Math.min(55, problemWidth + (deltaX / window.innerWidth) * 100)
       );
       const newEditorWidth = 100 - newProblemWidth;
       setProblemWidth(newProblemWidth);

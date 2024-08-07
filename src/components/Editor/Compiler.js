@@ -205,6 +205,7 @@ const Compiler = ({
                 padding: "6px 12px",
                 border: "none",
                 fontSize: "13px",
+                marginLeft: "15px",
               }}
               onClick={() => {
                 endInterview();
