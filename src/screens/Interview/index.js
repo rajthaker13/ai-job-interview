@@ -291,7 +291,7 @@ export default function Interview(props) {
 
   useEffect(() => {
     generateStarterCode();
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     if (outputDetails && outputDetails.stdout) {
