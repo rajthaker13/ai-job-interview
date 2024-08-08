@@ -96,21 +96,27 @@ export default function Report(props) {
 
     try {
       const context = `Your name is Katie. You are a tech interviewer for a large software company. You have just completed a technical interview with the student. 
-      Here was the problem: 
-      ${leetcodeMatches ? leetcodeMatches[0].metadata.title : ""} ${
-        leetcodeMatches ? leetcodeMatches[0].metadata.description : ""
+      Here were the 3 problems: 
+      ${
+        leetcodeMatches
+          ? leetcodeMatches.map((question) => {
+              return (
+                question.metadata.title + ": " + question.metadata.description
+              );
+            })
+          : ""
       }. 
-      Consider the optimal solution to the problem. The optimal solution is the one that has the best time and space complexity.
-      The student should have been talking through their solution, discussing ideas and potential implementations.
-      Here is a transcript of the interview. The student is "user" and you, the interviewer, are "gpt":
+
+      Consider the optimal solution to the problems. The optimal solution is the one that has the best time and space complexity.
+      The student should have been talking through their solutions, discussing ideas and potential implementations.
+      Here is a transcript of the interview. The student is "user" and you, the interviewer, are "gpt". All code submission are labled "code", output of submissions that compiled and executed are labled "output", output of submissions that had compile/runtime errors are labled "error":
       ${conversationString}
-      Consider the last version of code that the student submitted to you. You are to grade it using the test cases in the problem description as well as new test cases you come up with. If the student did not submit code, their score should be zero.
-      Your task now is to generate a report for the student. This interview was just a practice mock interview, so you are to provide feedback that would most help the student in their interview preparation.
+      Consider the last version of code that the student submitted to you for each problem. You are to grade it using the test cases in the problem description as well as new test cases you come up with. If the student did not submit code, their score should be zero for that problem.
+      Your task now is to generate a report for the student. This interview was a practice mock interview, so you are to provide feedback that would most help the student in their interview preparation.
       Consider the process the student took to arrive at the answer. Consider whether their answers were correct or not. Consider how much the student engaged in dialogue with you and showed you their though process.
       If you are asked for numerical metrics or score, your response should be an integer, so that it can be easily parsed.
       If you are asked for a text-based answer, your response should be short, easily readable, and you should always address the student directly, for example: 
-      "You need practice with dynamic programming style questions. I recommend you do more problems similar to the one you saw in the interview today."
-      `;
+      "You need practice with dynamic programming style questions. I recommend you do more problems similar to the one you saw in the interview today."`;
 
       let technicalPrompt = [
         { role: "system", content: context },
@@ -725,27 +731,29 @@ export default function Report(props) {
 
                 <p className="font-bold text-lg">Similar Questions:</p>
 
-                {parseProblems(
-                  leetcodeMatches[0].metadata.similar_questions
-                ).map((problem, index) => (
-                  <div key={index} className="flex items-center mb-3">
-                    <a
-                      href={problem.url}
-                      className="pr-3 block"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {problem.name}
-                    </a>
-                    <div
-                      className={`inline-block rounded-full font-bold bg-neutral-700 px-2 py-1 ${getDifficultyColor(
-                        problem.level
-                      )}`}
-                    >
-                      {problem.level}
-                    </div>
-                  </div>
-                ))}
+                {leetcodeMatches.map((match, index) =>
+                  parseProblems(match.metadata.similar_questions).map(
+                    (problem, index) => (
+                      <div key={index} className="flex items-center mb-3">
+                        <a
+                          href={problem.url}
+                          className="pr-3 block"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {problem.name}
+                        </a>
+                        <div
+                          className={`inline-block rounded-full font-bold bg-neutral-700 px-2 py-1 ${getDifficultyColor(
+                            problem.level
+                          )}`}
+                        >
+                          {problem.level}
+                        </div>
+                      </div>
+                    )
+                  )
+                )}
               </div>
             )}
           </div>

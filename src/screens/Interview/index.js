@@ -30,6 +30,7 @@ export default function Interview(props) {
   const [code, setCode] = useState("");
   const [outputDetails, setOutputDetails] = useState(null);
   const [language, setLanguage] = useState(languageOptions[0]);
+  const [questionIndex, setQuestionIndex] = useState(0);
 
   const isXResizing = useRef(false);
   const startX = useRef(0);
@@ -244,7 +245,7 @@ export default function Interview(props) {
       { role: "system", content: context },
       {
         role: "user",
-        content: `This is the problem the candidate will be required to solve: ${leetcodeMatches[0].metadata.title}: ${leetcodeMatches[0].metadata.description}.
+        content: `This is the problem the candidate will be required to solve: ${leetcodeMatches[questionIndex].metadata.title}: ${leetcodeMatches[questionIndex].metadata.description}.
         Generate start code for this problem in the target language. Return only the code and nothing else so that it will compile and have no syntax errors. Don't add any markdown elements for styling. Just a string.`,
       },
     ];
@@ -270,8 +271,12 @@ export default function Interview(props) {
       If the student has already given you some of their personal information, do not ask for it again.
       Here is the current conversation history. Use this as context: ${conversationString}
       The problem given to the student is the following problem: ${
-        leetcodeMatches ? leetcodeMatches[0].metadata.title : ""
-      } ${leetcodeMatches ? leetcodeMatches[0].metadata.description : ""}. 
+        leetcodeMatches ? leetcodeMatches[questionIndex].metadata.title : ""
+      } ${
+        leetcodeMatches
+          ? leetcodeMatches[questionIndex].metadata.description
+          : ""
+      }. 
       The student can see this problem and the visible test cases. You don't ever have to repeat the problem statement in its entirety. You can reference parts of it to answer questions though, of course.
       Consider the optimal solution to the problem. The optimal solution is the one that has the best time and space complexity.
       You are to act as an interviewer, not as AI helping the student. You may subtly nudge the student if their attempt is very far off from the correct answer, but let them do 90% of the work.
@@ -283,6 +288,7 @@ export default function Interview(props) {
       You should test all edge cases, check for compiler errors, runtime errors, and everything that would prevent the program from working correctly in an IDE.
       If the student submits to you a question or asks for clarification on the problem, do you best to answer, but if the question simply asks you for an implementation or answer, state that that is the job of the student themself.
       Don't include any LaTex style characters in your response. You can only use markdown elements and regular characters.
+      Keep your responses short. Don't go on and on, be succinct.
       
       Here is the latest iteration of the student's code: ${code}
       If it is just the template/starter code, do not consider it.`;
@@ -313,7 +319,7 @@ export default function Interview(props) {
 
   useEffect(() => {
     generateStarterCode();
-  }, [language]);
+  }, [language, questionIndex]);
 
   useEffect(() => {
     if (outputDetails && outputDetails.stdout) {
@@ -399,41 +405,43 @@ export default function Interview(props) {
         style={{ width: `${problemWidth}%`, minWidth: "20%" }}
         onClick={() => setSelectedDiv("problem")}
       >
-        {leetcodeMatches.map((question) => {
-          const { title, difficulty, description, url, related_topics } =
-            question.metadata;
-
-          return (
-            <div key={title} className="mb-4">
-              <h2 className="text-xl font-bold pb-1">{title}</h2>
-              <div className="flex pb-3">
-                <p
-                  className={`${getDifficultyColor(
-                    difficulty
-                  )} font-bold pr-2 text-base mt-0.5`}
-                >
-                  {difficulty}
-                </p>
-                <TopicDropdown topics={related_topics} />
-              </div>
-              <p
-                dangerouslySetInnerHTML={{
-                  __html: formatDescription(description),
-                }}
-              ></p>
-              <br></br>
-              <a
-                href={url}
-                className="text-blue-400 underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View on Leetcode
-              </a>
-              <br></br>
-            </div>
-          );
-        })}
+        <div
+          key={leetcodeMatches[questionIndex].metadata.title}
+          className="mb-4"
+        >
+          <h2 className="text-xl font-bold pb-1">
+            {leetcodeMatches[questionIndex].metadata.title}
+          </h2>
+          <div className="flex pb-3">
+            <p
+              className={`${getDifficultyColor(
+                leetcodeMatches[questionIndex].metadata.difficulty
+              )} font-bold pr-2 text-base mt-0.5`}
+            >
+              {leetcodeMatches[questionIndex].metadata.difficulty}
+            </p>
+            <TopicDropdown
+              topics={leetcodeMatches[questionIndex].metadata.related_topics}
+            />
+          </div>
+          <p
+            dangerouslySetInnerHTML={{
+              __html: formatDescription(
+                leetcodeMatches[questionIndex].metadata.description
+              ),
+            }}
+          ></p>
+          <br></br>
+          <a
+            href={leetcodeMatches[questionIndex].metadata.url}
+            className="text-blue-400 underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View on Leetcode
+          </a>
+          <br></br>
+        </div>
       </div>
       <div
         className="vertical-bar rounded w-0.5 h-[89vh] bg-neutral-700 hover:bg-blue-500 cursor-col-resize ml-1.5 mt-3 mb-3"
@@ -462,6 +470,8 @@ export default function Interview(props) {
             setLanguage={setLanguage}
             outputDetails={outputDetails}
             setOutputDetails={setOutputDetails}
+            questionIndex={questionIndex}
+            setQuestionIndex={setQuestionIndex}
             endInterview={endInterview}
           />
         </div>

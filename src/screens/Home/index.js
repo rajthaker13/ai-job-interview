@@ -29,7 +29,7 @@ export default function Home(props) {
     const ns1 = index.namespace("version-1");
 
     const matchingProblems = await ns1.query({
-      topK: 1,
+      topK: 3,
       vector: embedding.data[0].embedding,
       includeMetadata: true,
       filter: {
