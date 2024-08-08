@@ -222,6 +222,7 @@ export default function Interview(props) {
     const context = `You are conducting a software engineering interview for a software company. 
     Generate starter code that will be present in the IDE on load for the candidate to code in. 
     It should contain an aptly titled function as well as a print statement with 2 or 3 pre-loaded test cases so the candidate may see the output.
+    Do not give hints with the starter code, all functions and constructors should be blank inside. And classes should not have instance variables.
     The starter code should be in the following language: ${language.name}.
     Include common import/library statements so the candidate can use Lists, HashMaps, HashSets, Stacks, Queues, and other common data structures. 
     If the language is Java, the class should be named "Main".
