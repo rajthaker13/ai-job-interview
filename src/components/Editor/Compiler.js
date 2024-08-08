@@ -21,6 +21,7 @@ const Compiler = ({
   setLanguage,
   outputDetails,
   setOutputDetails,
+  endInterview,
 }) => {
   //TODO: Edit JavascriptDefault to reflect cur problem, also need to have code for other languages on language change...
   const [processing, setProcessing] = useState(null);
@@ -195,6 +196,22 @@ const Compiler = ({
               )}
             >
               {processing ? "Processing..." : "Compile and Execute"}
+            </button>
+            <button
+              style={{
+                backgroundColor: "#FF4D4D",
+                color: "white",
+                borderRadius: "8px",
+                padding: "6px 12px",
+                border: "none",
+                fontSize: "13px",
+                marginLeft: "15px",
+              }}
+              onClick={() => {
+                endInterview();
+              }}
+            >
+              End Interview
             </button>
           </div>
 

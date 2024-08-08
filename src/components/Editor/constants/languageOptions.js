@@ -5,6 +5,24 @@ export const languageOptions = [
     label: "JavaScript",
     value: "javascript",
   },
+  {
+    id: 62,
+    name: "Java (OpenJDK 13.0.1)",
+    label: "Java",
+    value: "java",
+  },
+  {
+    id: 71,
+    name: "Python (3.8.1)",
+    label: "Python3",
+    value: "python",
+  },
+  {
+    id: 54,
+    name: "C++ (GCC 9.2.0)",
+    label: "C++",
+    value: "cpp",
+  },
   //   {
   //     id: 45,
   //     name: "Assembly (NASM 2.14.02)",
@@ -65,12 +83,6 @@ export const languageOptions = [
     label: "C",
     value: "c",
   },
-  {
-    id: 54,
-    name: "C++ (GCC 9.2.0)",
-    label: "C++",
-    value: "cpp",
-  },
   //   {
   //     id: 86,
   //     name: "Clojure (1.10.1)",
@@ -101,12 +113,12 @@ export const languageOptions = [
   //     label: "D (DMD 2.089.1)",
   //     value: "d",
   //   },
-  {
-    id: 57,
-    name: "Elixir (1.9.4)",
-    label: "Elixir",
-    value: "elixir",
-  },
+  // {
+  //   id: 57,
+  //   name: "Elixir (1.9.4)",
+  //   label: "Elixir",
+  //   value: "elixir",
+  // },
   //   {
   //     id: 58,
   //     name: "Erlang (OTP 22.2)",
@@ -131,12 +143,12 @@ export const languageOptions = [
   //     label: "Fortran (GFortran 9.2.0)",
   //     value: "fortran",
   //   },
-  //   {
-  //     id: 60,
-  //     name: "Go (1.13.5)",
-  //     label: "Go (1.13.5)",
-  //     value: "go",
-  //   },
+  {
+    id: 60,
+    name: "Go (1.13.5)",
+    label: "Go (1.13.5)",
+    value: "go",
+  },
   //   {
   //     id: 88,
   //     name: "Groovy (3.0.3)",
@@ -149,12 +161,6 @@ export const languageOptions = [
   //     label: "Haskell (GHC 8.8.1)",
   //     value: "haskell",
   //   },
-  {
-    id: 62,
-    name: "Java (OpenJDK 13.0.1)",
-    label: "Java",
-    value: "java",
-  },
 
   {
     id: 78,
@@ -162,12 +168,12 @@ export const languageOptions = [
     label: "Kotlin",
     value: "kotlin",
   },
-  {
-    id: 64,
-    name: "Lua (5.3.5)",
-    label: "Lua (5.3.5)",
-    value: "lua",
-  },
+  // {
+  //   id: 64,
+  //   name: "Lua (5.3.5)",
+  //   label: "Lua (5.3.5)",
+  //   value: "lua",
+  // },
 
   {
     id: 79,
@@ -223,12 +229,6 @@ export const languageOptions = [
     label: "Python",
     value: "python",
   },
-  {
-    id: 71,
-    name: "Python (3.8.1)",
-    label: "Python3",
-    value: "python",
-  },
   //   {
   //     id: 80,
   //     name: "R (4.0.0)",
@@ -247,24 +247,24 @@ export const languageOptions = [
     label: "Rust",
     value: "rust",
   },
-  {
-    id: 81,
-    name: "Scala (2.13.2)",
-    label: "Scala",
-    value: "scala",
-  },
+  // {
+  //   id: 81,
+  //   name: "Scala (2.13.2)",
+  //   label: "Scala",
+  //   value: "scala",
+  // },
   //   {
   //     id: 82,
   //     name: "SQL (SQLite 3.27.2)",
   //     label: "SQL (SQLite 3.27.2)",
   //     value: "sql",
   //   },
-  //   {
-  //     id: 83,
-  //     name: "Swift (5.2.3)",
-  //     label: "Swift (5.2.3)",
-  //     value: "swift",
-  //   },
+  {
+    id: 83,
+    name: "Swift (5.2.3)",
+    label: "Swift (5.2.3)",
+    value: "swift",
+  },
   {
     id: 74,
     name: "TypeScript (3.7.4)",

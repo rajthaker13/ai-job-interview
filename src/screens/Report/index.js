@@ -425,10 +425,10 @@ export default function Report(props) {
 
   return (
     <div
-      className="bg-[#05050D] text-white flex-col"
-      style={{ height: "100vh", width: "100vw" }}
+      className="bg-[#05050D] text-white flex-col pt-1 pb-3"
+      style={{ height: "92vh", width: "100vw" }}
     >
-      <p className="font-bold text-4xl pl-6 pt-6 pb-3">Your Interview Report</p>
+      {/*<p className="font-bold text-4xl pl-6 pt-6 pb-3">Your Interview Report</p>*/}
       <div className="flex justify-center mt-5">
         <div
           className="flex-col w-[40vw] ml-5"
@@ -684,7 +684,7 @@ export default function Report(props) {
               borderBottomLeftRadius: "0",
             }}
           >
-            <p className="p-2 font-bold">Similar Questions</p>
+            <p className="p-2 font-bold">Keep Practicing</p>
           </div>
           <div
             className={`bg-neutral-800 border-b border-l border-r ${
@@ -699,15 +699,39 @@ export default function Report(props) {
               borderBottomLeftRadius: "10px",
             }}
           >
-            <div className="p-4 w-full">
-              {leetcodeMatches &&
-                parseProblems(
+            {leetcodeMatches && (
+              <div className="p-4 w-full flex flex-col">
+                <p className="font-bold text-lg">Your Questions:</p>
+
+                {leetcodeMatches.map((match, index) => (
+                  <div key={index} className="flex items-center mb-3">
+                    <a
+                      href={match.metadata.url}
+                      className="pr-3 block"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {match.metadata.title}
+                    </a>
+                    <div
+                      className={`inline-block rounded-full font-bold bg-neutral-700 px-2 py-1 ${getDifficultyColor(
+                        match.metadata.difficulty
+                      )}`}
+                    >
+                      {match.metadata.difficulty}
+                    </div>
+                  </div>
+                ))}
+
+                <p className="font-bold text-lg">Similar Questions:</p>
+
+                {parseProblems(
                   leetcodeMatches[0].metadata.similar_questions
                 ).map((problem, index) => (
-                  <div key={index} className="flex items-center mb-4">
+                  <div key={index} className="flex items-center mb-3">
                     <a
                       href={problem.url}
-                      className="font-bold pr-3 block"
+                      className="pr-3 block"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -722,7 +746,8 @@ export default function Report(props) {
                     </div>
                   </div>
                 ))}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

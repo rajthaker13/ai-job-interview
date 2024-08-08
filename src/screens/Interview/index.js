@@ -67,7 +67,7 @@ export default function Interview(props) {
       const deltaX = e.clientX - startX.current;
       const newProblemWidth = Math.max(
         20,
-        Math.min(70, problemWidth + (deltaX / window.innerWidth) * 100)
+        Math.min(55, problemWidth + (deltaX / window.innerWidth) * 100)
       );
       const newEditorWidth = 100 - newProblemWidth;
       setProblemWidth(newProblemWidth);
@@ -136,6 +136,26 @@ export default function Interview(props) {
     // Convert `code` text to styled code
     formattedText = formattedText.replace(/`(.*?)`/g, "<code>$1</code>");
 
+    // Convert Markdown headers to HTML headers
+    formattedText = formattedText.replace(
+      /###### (.*?)(<br>|$)/g,
+      "<h6>$1</h6>$2"
+    );
+    formattedText = formattedText.replace(
+      /##### (.*?)(<br>|$)/g,
+      "<h5>$1</h5>$2"
+    );
+    formattedText = formattedText.replace(
+      /#### (.*?)(<br>|$)/g,
+      "<h4>$1</h4>$2"
+    );
+    formattedText = formattedText.replace(
+      /### (.*?)(<br>|$)/g,
+      "<h3>$1</h3>$2"
+    );
+    formattedText = formattedText.replace(/## (.*?)(<br>|$)/g, "<h2>$1</h2>$2");
+    formattedText = formattedText.replace(/# (.*?)(<br>|$)/g, "<h1>$1</h1>$2");
+
     return formattedText;
   };
 
@@ -162,8 +182,6 @@ export default function Interview(props) {
     formattedText = formattedText.replace(/`(.*?)`/g, "<code>$1</code>");
     return formattedText;
   };
-
-  // Funct
 
   // Function to format the topics
   const formatTopics = (topics) => {
@@ -204,8 +222,10 @@ export default function Interview(props) {
     Generate starter code that will be present in the IDE on load for the candidate to code in. 
     It should contain an aptly titled function as well as a print statement with 2 or 3 pre-loaded test cases so the candidate may see the output.
     The starter code should be in the following language: ${language.name}.
+    Include common import/library statements so the candidate can use Lists, HashMaps, HashSets, Stacks, Queues, and other common data structures. 
+    If the language is Java, the class should be named "Main".
 
-    Here is an example of starter code and a test case for problem Binary Search. 
+    Here is an example of starter code in JavaScript and a test case for problem Binary Search. 
     /**
     * Problem: Binary Search: Search a sorted array for a target value.
     */
@@ -234,8 +254,6 @@ export default function Interview(props) {
       model: "gpt-4o-mini",
     });
 
-    console.log(response);
-
     if (response.choices[0]) {
       setCode(response.choices[0].message.content);
     }
@@ -257,14 +275,17 @@ export default function Interview(props) {
       The student can see this problem and the visible test cases. You don't ever have to repeat the problem statement in its entirety. You can reference parts of it to answer questions though, of course.
       Consider the optimal solution to the problem. The optimal solution is the one that has the best time and space complexity.
       You are to act as an interviewer, not as AI helping the student. You may subtly nudge the student if their attempt is very far off from the correct answer, but let them do 90% of the work.
-      Let them fail if they cannot reach a solution. You are not meant to help the student, but to grade their ability and engage in a discussion about the problem. Don't give hints unless the student asks for them.
+      Let them fail if they cannot reach a solution. You are not meant to help the student, but to grade their ability and engage in a discussion about the problem. Don't give hints.
       You should encourage the student to talk through their solution, discussing ideas and potential implementations.
       If the student submits code to you, you are to grade it using the test cases in the problem description as well as new test cases you come up with. You don't need to display the test cases, just comment on whether the code passed the test case or not.
-      Ask the student what they think the time and space complexity of their implementation is. Have a discussion about it, but do not give them the answer. They must come to the answer themselves.
+      If the student has submitted code, ask the student what they think the time and space complexity of their implementation is. Have a discussion about it, but do not give them the answer. They must come to the answer themselves.
       Run the students code and tell the student whether or not they passed all the test cases. If they did, but not optimally, ask if there is any room for time or space complexity improvement.
       You should test all edge cases, check for compiler errors, runtime errors, and everything that would prevent the program from working correctly in an IDE.
       If the student submits to you a question or asks for clarification on the problem, do you best to answer, but if the question simply asks you for an implementation or answer, state that that is the job of the student themself.
-      Don't include any LaTex style characters in your response. You can only use markdown elements and regular characters.`;
+      Don't include any LaTex style characters in your response. You can only use markdown elements and regular characters.
+      
+      Here is the latest iteration of the student's code: ${code}
+      If it is just the template/starter code, do not consider it.`;
 
       let userPrompt = [
         { role: "system", content: context },
@@ -292,15 +313,44 @@ export default function Interview(props) {
 
   useEffect(() => {
     generateStarterCode();
-  }, []);
+  }, [language]);
 
-  /* useEffect(() => {
-    setConversationHistory((prevHistory) => [
-      ...prevHistory,
-      { type: "code", content: code },
-      { type: "output", content: outputDetails },
-    ]);
-  }, outputDetails);*/
+  useEffect(() => {
+    if (outputDetails && outputDetails.stdout) {
+      setConversationHistory((prevHistory) => [
+        ...prevHistory,
+        {
+          type: "code",
+          content: "Submitted Code (Compiled & Ran Successfully):\n" + code,
+        },
+        { type: "output", content: atob(outputDetails.stdout) },
+      ]);
+    } else if (outputDetails && outputDetails.stderr) {
+      setConversationHistory((prevHistory) => [
+        ...prevHistory,
+        {
+          type: "code",
+          content: "Submitted Code (Threw Error):\n" + code,
+        },
+        { type: "error", content: atob(outputDetails.stderr) },
+      ]);
+    } else if (outputDetails && outputDetails.compile_output) {
+      setConversationHistory((prevHistory) => [
+        ...prevHistory,
+        {
+          type: "code",
+          content: "Submitted Code (Threw Error):\n" + code,
+        },
+        { type: "error", content: atob(outputDetails.compile_output) },
+      ]);
+    }
+
+    if (outputDetails) {
+      promptGPT(
+        "The student just submitted code. The code and output is above. Analyze the correctness and time complexity of the code and discuss with the student."
+      );
+    }
+  }, [outputDetails]);
 
   // Component for the Topic Dropdown
   const TopicDropdown = ({ topics }) => {
@@ -341,8 +391,13 @@ export default function Interview(props) {
       style={{ height: "92vh", width: "100vw" }}
     >
       <div
-        className="bg-neutral-800 rounded-lg overflow-y-auto border border-neutral-700 p-4 ml-3 my-3"
+        className={`bg-neutral-800 rounded-lg overflow-y-auto border ${
+          selectedDiv === "problem"
+            ? "border-neutral-500"
+            : "border-neutral-700"
+        } p-4 ml-3 my-3`}
         style={{ width: `${problemWidth}%`, minWidth: "20%" }}
+        onClick={() => setSelectedDiv("problem")}
       >
         {leetcodeMatches.map((question) => {
           const { title, difficulty, description, url, related_topics } =
@@ -388,12 +443,15 @@ export default function Interview(props) {
         onMouseDown={startXResizing}
       ></div>
       <div
-        className="flex flex-col flex-grow mr-3"
+        className="flex flex-col mr-3"
         style={{ width: `${editorWidth}%`, minWidth: "20%" }}
       >
         <div
-          className="rounded-lg bg-neutral-800 border border-neutral-700 ml-1.5 mb-1.5 mt-3"
+          className={`rounded-lg bg-neutral-800 border ${
+            selectedDiv === "ide" ? "border-neutral-500" : "border-neutral-700"
+          } ml-1.5 mb-1.5 mt-3`}
           style={{ height: `${ideHeight}%` }}
+          onClick={() => setSelectedDiv("ide")}
         >
           <Compiler
             editorHeight={0.8 * ideHeight}
@@ -404,6 +462,7 @@ export default function Interview(props) {
             setLanguage={setLanguage}
             outputDetails={outputDetails}
             setOutputDetails={setOutputDetails}
+            endInterview={endInterview}
           />
         </div>
         <div
@@ -411,27 +470,48 @@ export default function Interview(props) {
           onMouseDown={startYResizing}
         ></div>
         <div
-          className="relative rounded-lg bg-neutral-800 border border-neutral-700 ml-1.5 mb-3"
+          className={`relative rounded-lg bg-neutral-800 border ${
+            selectedDiv === "conversation"
+              ? "border-neutral-500"
+              : "border-neutral-700"
+          } ml-1.5 mb-3 flex flex-col`}
           style={{
-            height: `${100 - ideHeight}%`,
+            height: `${95 - ideHeight}%`,
           }}
+          onClick={() => setSelectedDiv("conversation")}
         >
-          <div
-            className="p-2 overflow-y-auto"
-            style={{ height: "calc(100% - 60px)" }}
-          >
-            {conversationHistory.map((msg, index) => (
-              <div
-                key={index}
-                className={`py-1 whitespace-pre-wrap break-words ${
-                  msg.type === "gpt" ? "text-blue-300" : "text-green-300"
-                }`}
-              >
-                {msg.content}
-              </div>
-            ))}
+          <div className="p-2 overflow-y-auto flex-grow">
+            {conversationHistory.map((msg, index) => {
+              if (msg.type == "user" || msg.type == "gpt") {
+                return (
+                  <p
+                    key={index}
+                    className={`py-1 whitespace-pre-wrap break-words ${
+                      msg.type === "gpt" ? "text-blue-300" : "text-white"
+                    }`}
+                    dangerouslySetInnerHTML={{
+                      __html: msg.content,
+                    }}
+                  ></p>
+                );
+              } else if (msg.type == "output" || msg.type == "error") {
+                return (
+                  <p
+                    key={index}
+                    className={`py-1 whitespace-pre-wrap break-words ${
+                      msg.type == "error" ? "text-red-500" : "text-green-500"
+                    }`}
+                    dangerouslySetInnerHTML={{
+                      __html: "OUTPUT:<br>" + msg.content,
+                    }}
+                  ></p>
+                );
+              } else {
+                return "";
+              }
+            })}
           </div>
-          <div className="absolute rounded-lg bottom-0 left-0 w-full p-2 bg-neutral-800">
+          <div className="rounded-lg bottom-0 left-0 w-full p-2 bg-neutral-800 flex-shrink-0">
             <input
               onKeyDown={async (event) => {
                 if (event.key === "Enter") {
@@ -472,6 +552,35 @@ export default function Interview(props) {
         }
         input::placeholder {
           color: var(--placeholder-color);
+        }
+        h1 {
+          font-size: 1.75em;
+          font-weight: bold;
+        }
+
+        h2 {
+          font-size: 1.5em;
+          font-weight: bold;
+        }
+
+        h3 {
+          font-size: 1.25em;
+          font-weight: bold;
+        }
+
+        h4 {
+          font-size: 1em;
+          font-weight: bold;
+        }
+
+        h5 {
+          font-size: 0.875em;
+          font-weight: bold;
+        }
+
+        h6 {
+          font-size: 0.75em;
+          font-weight: bold;
         }
       `}</style>
     </div>

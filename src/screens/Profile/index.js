@@ -75,13 +75,10 @@ export default function Profile(props) {
       if (data && data[0]) {
         setInterviews(data[0].interviews);
         let overall = 0;
-        let count = 0;
         for (const interview of data[0].interviews) {
-          overall += interview.report.overallScore;
-          count++;
-          console.log(interview.date);
+          overall += parseInt(interview.report.overallScore);
         }
-        setOverallScore(overall / count);
+        setOverallScore(Math.round(overall / data[0].interviews.length));
       }
     } catch (error) {}
   }
