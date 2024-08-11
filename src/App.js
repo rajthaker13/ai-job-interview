@@ -20,10 +20,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Login db={supabase} isNewAccount={true} />} />
         <Route
+          path="/signup"
+          element={<Login db={supabase} isNewAccount={true} />}
+        />
+        <Route
           path="/login"
           element={<Login db={supabase} isNewAccount={false} />}
         />
-        <Route path="/home" element={<Home db={supabase} />} />
+        <Route path="/home" element={<Profile db={supabase} />} />
         <Route path="/interview" element={<Interview db={supabase} />} />
         <Route path="/report" element={<Report db={supabase} />} />
         <Route path="/profile" element={<Profile db={supabase} />} />
