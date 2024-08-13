@@ -33,7 +33,8 @@ export default function Login(props) {
       });
       localStorage.setItem("email", data.user.email);
       localStorage.setItem("uid", data.user.id);
-      //navigation("/home");
+      await props.db.from("users").insert({ uid: data.user.id });
+      navigation("/home");
     }
   }
 
@@ -42,10 +43,10 @@ export default function Login(props) {
       localStorage.clear();
       const { data, error } = await props.db.auth.signInWithOAuth({
         provider: provider,
-        options: {
-          redirectTo: "http://localhost:3000/home",
-        },
       });
+
+      //need to fix
+      console.log("Data", data);
     } catch (error) {
       console.error(`Error signing in with ${provider}:`, error);
     }
@@ -128,7 +129,7 @@ export default function Login(props) {
             >
               {isNewAccount ? "Create account" : "Sign in"}
             </button>
-            <button
+            {/* <button
               onClick={async () => {
                 await signInWithOAuth("google");
               }}
@@ -148,7 +149,7 @@ export default function Login(props) {
               {isNewAccount
                 ? "Create account with Github"
                 : "Sign in with Github"}
-            </button>
+            </button> */}
           </div>
           {isNewAccount && (
             <p className="mt-4 text-tremor-subtitle text-tremor-content dark:text-dark-tremor-content">
