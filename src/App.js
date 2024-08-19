@@ -5,6 +5,7 @@ import Login from "./screens/Login";
 import Home from "./screens/Home";
 import Interview from "./screens/Interview";
 import Header from "./components/Header";
+import Resume from "./screens/Resume";
 
 function App() {
   const supabaseUrl = "https://twqwiryumiolecfebqtd.supabase.co";
@@ -23,6 +24,7 @@ function App() {
         />
         <Route path="/home" element={<Home db={supabase} />} />
         <Route path="/interview" element={<Interview db={supabase} />} />
+        <Route path="/resume" element={<Resume />} />
       </Routes>
     </Router>
   );
