@@ -33,7 +33,10 @@ export default function Login(props) {
       });
       localStorage.setItem("email", data.user.email);
       localStorage.setItem("uid", data.user.id);
-      //navigation("/home");
+      await props.db.from("users").insert({
+        uid: data.user.id,
+      });
+      navigation("/home");
     }
   }
 
@@ -128,7 +131,7 @@ export default function Login(props) {
             >
               {isNewAccount ? "Create account" : "Sign in"}
             </button>
-            <button
+            {/* <button
               onClick={async () => {
                 await signInWithOAuth("google");
               }}
@@ -148,7 +151,7 @@ export default function Login(props) {
               {isNewAccount
                 ? "Create account with Github"
                 : "Sign in with Github"}
-            </button>
+            </button> */}
           </div>
           {isNewAccount && (
             <p className="mt-4 text-tremor-subtitle text-tremor-content dark:text-dark-tremor-content">
