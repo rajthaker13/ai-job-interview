@@ -6,6 +6,10 @@ import automock from "../../assets/logo.png";
 import favicon from "../../assets/favicon.png";
 import coderoyale from "../../assets/coderoyale.png";
 import CardDataStats from "../../components/CardDataStats";
+import ChartOne from "../../components/Charts/ChartOne";
+import ChartTwo from "../../components/Charts/ChartTwo";
+import ChartThree from "../../components/Charts/ChartThree";
+import TableOne from "../../components/Tables/TableOne";
 
 export default function Home(props) {
   const openai = new OpenAI({
@@ -43,8 +47,8 @@ export default function Home(props) {
   }
 
   return (
-    <>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
+    <div className="ml-5 mr-5">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 mt-10">
         <CardDataStats title="Total views" total="$3.456K" rate="0.43%" levelUp>
           <svg
             className="fill-primary dark:fill-white"
@@ -131,16 +135,18 @@ export default function Home(props) {
         </CardDataStats>
       </div>
 
-      {/* <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
+      <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
         <ChartOne />
         <ChartTwo />
-        <ChartThree />
-        <MapOne />
         <div className="col-span-12 xl:col-span-8">
           <TableOne />
         </div>
-        <ChatCard />
-      </div> */}
-    </>
+        <div className="col-span-12 xl:col-span-4">
+          <ChartThree />
+        </div>
+        {/* <MapOne /> */}
+        {/* <ChatCard /> */}
+      </div>
+    </div>
   );
 }

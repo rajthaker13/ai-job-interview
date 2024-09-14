@@ -34,7 +34,7 @@ function App() {
             path="/home"
             element={
               <>
-                <Home db={supabase} />
+                <Profile db={supabase} />
               </>
             }
           />
