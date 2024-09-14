@@ -1,9 +1,22 @@
-import React, { useState, ReactNode } from "react";
+import React, { useState, ReactNode, useEffect } from "react";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
+import { useLocation } from "react-router-dom";
 
 const DefaultLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    console.log(children);
+    console.log(location.pathname);
+    if (location.pathname === "/signup" || location.pathname === "/login" || location.pathname === "/") {
+      setSidebarOpen(false);
+    }
+    else {
+      setSidebarOpen(true);
+    }
+  }, []);
 
   return (
     <div className="dark:bg-boxdark-2 dark:text-bodydark">

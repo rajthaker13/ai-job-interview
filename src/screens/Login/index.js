@@ -55,7 +55,7 @@ export default function Login(props) {
   }
 
   return (
-    <div className="flex justify-center items-center text-center h-[90vh] bg-[#05050D]">
+    <div className="flex justify-center items-center text-center h-[100vh] bg-[#05050D]">
       <div className=" h-[auto] rounded-lg w-[20vw]">
         <div className="">
           <img
