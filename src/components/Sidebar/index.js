@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import Logo from "../../assets/coderoyale.png";
 
-const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
+const Sidebar = () => {
   const location = useLocation();
   const { pathname } = location;
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const trigger = useRef(null);
   const sidebar = useRef(null);
@@ -14,40 +15,51 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     storedSidebarExpanded === null ? false : storedSidebarExpanded === "true"
   );
 
-  // close on click outside
+
   useEffect(() => {
-    const clickHandler = ({ target }) => {
-      if (!sidebar.current || !trigger.current) return;
-      if (
-        !sidebarOpen ||
-        sidebar.current.contains(target) ||
-        trigger.current.contains(target)
-      )
-        return;
+    console.log(location.pathname);
+    if (location.pathname === "/signup" || location.pathname === "/login" || location.pathname === "/") {
       setSidebarOpen(false);
-    };
-    document.addEventListener("click", clickHandler);
-    return () => document.removeEventListener("click", clickHandler);
-  });
+    }
+    else {
+      setSidebarOpen(true);
+    }
+  }, [pathname]);
+
+  // close on click outside
+  // useEffect(() => {
+  //   const clickHandler = ({ target }) => {
+  //     if (!sidebar.current || !trigger.current) return;
+  //     if (
+  //       !sidebarOpen ||
+  //       sidebar.current.contains(target) ||
+  //       trigger.current.contains(target)
+  //     )
+  //       return;
+  //     setSidebarOpen(false);
+  //   };
+  //   document.addEventListener("click", clickHandler);
+  //   return () => document.removeEventListener("click", clickHandler);
+  // });
 
   // close if the esc key is pressed
-  useEffect(() => {
-    const keyHandler = ({ keyCode }) => {
-      if (!sidebarOpen || keyCode !== 27) return;
-      setSidebarOpen(false);
-    };
-    document.addEventListener("keydown", keyHandler);
-    return () => document.removeEventListener("keydown", keyHandler);
-  });
+  // useEffect(() => {
+  //   const keyHandler = ({ keyCode }) => {
+  //     if (!sidebarOpen || keyCode !== 27) return;
+  //     setSidebarOpen(false);
+  //   };
+  //   document.addEventListener("keydown", keyHandler);
+  //   return () => document.removeEventListener("keydown", keyHandler);
+  // });
 
-  useEffect(() => {
-    localStorage.setItem("sidebar-expanded", sidebarExpanded.toString());
-    if (sidebarExpanded) {
-      document.querySelector("body")?.classList.add("sidebar-expanded");
-    } else {
-      document.querySelector("body")?.classList.remove("sidebar-expanded");
-    }
-  }, [sidebarExpanded]);
+  // useEffect(() => {
+  //   localStorage.setItem("sidebar-expanded", sidebarExpanded.toString());
+  //   if (sidebarExpanded) {
+  //     document.querySelector("body")?.classList.add("sidebar-expanded");
+  //   } else {
+  //     document.querySelector("body")?.classList.remove("sidebar-expanded");
+  //   }
+  // }, [sidebarExpanded]);
 
   return (
     <>
