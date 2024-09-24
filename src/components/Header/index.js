@@ -1,66 +1,87 @@
-import React, { useEffect, useState, useRef } from "react";
-import coderoyale from "../../assets/coderoyale.png";
+import { Link, NavLink, useLocation } from "react-router-dom";
+import DropdownUser from "./DropdownUser";
+import LogoIcon from "../../assets/coderoyale.png";
+import { useEffect, useRef, useState } from "react";
 
-export default function Header(props) {
+const Header = () => {
+  const location = useLocation();
+  const { pathname } = location;
+  const [headerOpen, setHeaderOpen] = useState(false);
+
+  useEffect(() => {
+    console.log(location.pathname);
+    if (location.pathname === "/signup" || location.pathname === "/login" || location.pathname === "/") {
+      setHeaderOpen(false);
+    }
+    else {
+      setHeaderOpen(true);
+    }
+  }, [pathname]);
+
   return (
-    <div className="navbar bg-[#05050D] h-[8vh]">
-      <div className="navbar-start">
-        <div className="dropdown">
-          <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h8m-8 6h16"
-              />
-            </svg>
+    <>
+      {headerOpen && (
+        <header className="sticky top-0 z-999 flex w-full bg-black drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none">
+          <div className="flex flex-grow items-center justify-between px-4 py-4 shadow-2 md:px-6 2xl:px-11">
+            <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
+              {/* <!-- Hamburger Toggle BTN --> */}
+              <button
+                aria-controls="sidebar"
+                // onClick={(e) => {
+                //   e.stopPropagation();
+                //   props.setSidebarOpen(!props.sidebarOpen);
+                // }}
+                className="z-99999 block rounded-sm border border-stroke bg-white p-1.5 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden"
+              >
+                <span className="relative block h-5.5 w-5.5 cursor-pointer">
+                  <span className="du-block absolute right-0 h-full w-full">
+                    <span
+                      className={`relative left-0 top-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-[0] duration-200 ease-in-out dark:bg-white ${!headerOpen && "!w-full delay-300"
+                        }`}
+                    ></span>
+                    <span
+                      className={`relative left-0 top-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-150 duration-200 ease-in-out dark:bg-white ${!headerOpen && "delay-400 !w-full"
+                        }`}
+                    ></span>
+                    <span
+                      className={`relative left-0 top-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-200 duration-200 ease-in-out dark:bg-white ${!headerOpen && "!w-full delay-500"
+                        }`}
+                    ></span>
+                  </span>
+                  <span className="absolute right-0 h-full w-full rotate-45">
+                    <span
+                      className={`absolute left-2.5 top-0 block h-full w-0.5 rounded-sm bg-black delay-300 duration-200 ease-in-out dark:bg-white ${!headerOpen && "!h-0 !delay-[0]"
+                        }`}
+                    ></span>
+                    <span
+                      className={`delay-400 absolute left-0 top-2.5 block h-0.5 w-full rounded-sm bg-black duration-200 ease-in-out dark:bg-white ${!headerOpen && "!h-0 !delay-200"
+                        }`}
+                    ></span>
+                  </span>
+                </span>
+              </button>
+              {/* <!-- Hamburger Toggle BTN --> */}
+
+              <Link className="block flex-shrink-0 lg:hidden w-[25px]" to="/">
+                <img
+                  src={LogoIcon}
+                  className="object-contain w-[10vw] ml-[1vw]"
+                  alt="Logo"
+                />
+              </Link>
+            </div>
+
+            <div className="hidden sm:block"></div>
+
+            <div className="flex items-center gap-3 2xsm:gap-7">
+              <DropdownUser />
+            </div>
           </div>
-          <ul
-            tabIndex={0}
-            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
-          >
-            <li>
-              <a>Item 1</a>
-            </li>
-            <li>
-              <a>Parent</a>
-              <ul className="p-2">
-                <li>
-                  <a>Submenu 1</a>
-                </li>
-                <li>
-                  <a>Submenu 2</a>
-                </li>
-              </ul>
-            </li>
-            <li>
-              <a>Item 3</a>
-            </li>
-          </ul>
-        </div>
-        <img src={coderoyale} className="object-contain w-[10vw] ml-[1vw]" />
-      </div>
-      <div className="navbar-center hidden lg:flex">
-        {/* <ul className="menu menu-horizontal px-1">
-          <li>
-            <a>Item 1</a>
-          </li>
-          <li>
-            <a>Item 2</a>
-          </li>
-          <li>
-            <a>Item 3</a>
-          </li>
-        </ul> */}
-      </div>
-      <div className="navbar-end">{/* <a className="btn">Button</a> */}</div>
-    </div>
+        </header>
+
+      )}
+    </>
   );
-}
+};
+
+export default Header;
