@@ -197,9 +197,8 @@ export default function Interview(props) {
     return topics.split(",").map((topic, index, array) => (
       <li
         key={index}
-        className={`py-1 px-2 ${
-          index < array.length - 1 ? "border-b border-gray-300" : ""
-        }`}
+        className={`py-1 px-2 ${index < array.length - 1 ? "border-b border-gray-300" : ""
+          }`}
       >
         {topic.trim()}
       </li>
@@ -271,13 +270,11 @@ export default function Interview(props) {
       const context = `Your name is Katie. You are a tech interviewer for a large software company. You are conducting a technical coding interview with a current or recently graduated university student.
       If the student has already given you some of their personal information, do not ask for it again.
       Here is the current conversation history. Use this as context: ${conversationString}
-      The problem given to the student is the following problem: ${
-        leetcodeMatches ? leetcodeMatches[questionIndex].metadata.title : ""
-      } ${
-        leetcodeMatches
+      The problem given to the student is the following problem: ${leetcodeMatches ? leetcodeMatches[questionIndex].metadata.title : ""
+        } ${leetcodeMatches
           ? leetcodeMatches[questionIndex].metadata.description
           : ""
-      }. 
+        }. 
       The student can see this problem and the visible test cases. You don't ever have to repeat the problem statement in its entirety. You can reference parts of it to answer questions though, of course.
       Consider the optimal solution to the problem. The optimal solution is the one that has the best time and space complexity.
       You are to act as an interviewer, not as AI helping the student. You may subtly nudge the student if their attempt is very far off from the correct answer, but let them do 90% of the work.
@@ -398,11 +395,10 @@ export default function Interview(props) {
       style={{ height: "92vh", width: "100vw" }}
     >
       <div
-        className={`bg-neutral-800 rounded-lg overflow-y-auto border ${
-          selectedDiv === "problem"
-            ? "border-neutral-500"
-            : "border-neutral-700"
-        } p-4 ml-3 my-3`}
+        className={`bg-neutral-800 rounded-lg overflow-y-auto border ${selectedDiv === "problem"
+          ? "border-neutral-500"
+          : "border-neutral-700"
+          } p-4 ml-3 my-3`}
         style={{ width: `${problemWidth}%`, minWidth: "20%" }}
         onClick={() => setSelectedDiv("problem")}
       >
@@ -456,9 +452,8 @@ export default function Interview(props) {
         style={{ width: `${editorWidth}%`, minWidth: "20%" }}
       >
         <div
-          className={`rounded-lg bg-neutral-800 border ${
-            selectedDiv === "ide" ? "border-neutral-500" : "border-neutral-700"
-          } ml-1.5 mb-1.5 mt-3`}
+          className={`rounded-lg bg-neutral-800 border ${selectedDiv === "ide" ? "border-neutral-500" : "border-neutral-700"
+            } ml-1.5 mb-1.5 mt-3`}
           style={{ height: `${ideHeight}%` }}
           onClick={() => setSelectedDiv("ide")}
         >
@@ -481,11 +476,10 @@ export default function Interview(props) {
           onMouseDown={startYResizing}
         ></div>
         <div
-          className={`relative rounded-lg bg-neutral-800 border ${
-            selectedDiv === "conversation"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-          } ml-1.5 mb-3 flex flex-col`}
+          className={`relative rounded-lg bg-neutral-800 border ${selectedDiv === "conversation"
+            ? "border-neutral-500"
+            : "border-neutral-700"
+            } ml-1.5 mb-3 flex flex-col`}
           style={{
             height: `${95 - ideHeight}%`,
           }}
@@ -497,9 +491,8 @@ export default function Interview(props) {
                 return (
                   <p
                     key={index}
-                    className={`py-1 whitespace-pre-wrap break-words ${
-                      msg.type === "gpt" ? "text-blue-300" : "text-white"
-                    }`}
+                    className={`py-1 whitespace-pre-wrap break-words ${msg.type === "gpt" ? "text-blue-300" : "text-white"
+                      }`}
                     dangerouslySetInnerHTML={{
                       __html: msg.content,
                     }}
@@ -509,9 +502,8 @@ export default function Interview(props) {
                 return (
                   <p
                     key={index}
-                    className={`py-1 whitespace-pre-wrap break-words ${
-                      msg.type == "error" ? "text-red-500" : "text-green-500"
-                    }`}
+                    className={`py-1 whitespace-pre-wrap break-words ${msg.type == "error" ? "text-red-500" : "text-green-500"
+                      }`}
                     dangerouslySetInnerHTML={{
                       __html: "OUTPUT:<br>" + msg.content,
                     }}
