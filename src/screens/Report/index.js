@@ -97,15 +97,14 @@ export default function Report(props) {
     try {
       const context = `Your name is Katie. You are a tech interviewer for a large software company. You have just completed a technical interview with the student. 
       Here were the 3 problems: 
-      ${
-        leetcodeMatches
+      ${leetcodeMatches
           ? leetcodeMatches.map((question) => {
-              return (
-                question.metadata.title + ": " + question.metadata.description
-              );
-            })
+            return (
+              question.metadata.title + ": " + question.metadata.description
+            );
+          })
           : ""
-      }. 
+        }. 
 
       Consider the optimal solution to the problems. The optimal solution is the one that has the best time and space complexity.
       The student should have been talking through their solutions, discussing ideas and potential implementations.
@@ -446,11 +445,10 @@ export default function Report(props) {
           }}
         >
           <div
-            className={`bg-neutral-700 border-t border-l border-r ${
-              selectedDiv == "technical"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-            } h-[5vh]`}
+            className={`bg-neutral-700 border-t border-l border-r ${selectedDiv == "technical"
+              ? "border-neutral-500"
+              : "border-neutral-700"
+              } h-[5vh]`}
             style={{
               borderTopLeftRadius: "10px",
               borderTopRightRadius: "10px",
@@ -461,11 +459,10 @@ export default function Report(props) {
             <p className="p-2 font-bold">Technical Score</p>
           </div>
           <div
-            className={`bg-neutral-800 border-b border-l border-r ${
-              selectedDiv == "technical"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-            } h-[30vh] flex justify-center overflow-y-auto`}
+            className={`bg-neutral-800 border-b border-l border-r ${selectedDiv == "technical"
+              ? "border-neutral-500"
+              : "border-neutral-700"
+              } h-[30vh] flex justify-center overflow-y-auto`}
             style={{
               borderTopLeftRadius: "0",
               borderTopRightRadius: "0",
@@ -477,7 +474,7 @@ export default function Report(props) {
               {technicalScores.map((obj, index) => (
                 <div className="flex items-center w-full py-4" key={index}>
                   <p className="flex-grow text-left font-bold">{obj.name}</p>
-                  <p className="w-12 text-center mr-20">{`${obj.score}/100`}</p>
+                  <p className="w-12 text-center mr-20">{`${obj.score}`}</p>
                   <ProgressBar
                     value={obj.score}
                     color={"teal"}
@@ -498,11 +495,10 @@ export default function Report(props) {
           }}
         >
           <div
-            className={`bg-neutral-700 border-t border-l border-r ${
-              selectedDiv == "verbal"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-            } h-[5vh]`}
+            className={`bg-neutral-700 border-t border-l border-r ${selectedDiv == "verbal"
+              ? "border-neutral-500"
+              : "border-neutral-700"
+              } h-[5vh]`}
             style={{
               borderTopLeftRadius: "10px",
               borderTopRightRadius: "10px",
@@ -513,11 +509,10 @@ export default function Report(props) {
             <p className="p-2 font-bold">Verbal Score</p>
           </div>
           <div
-            className={`bg-neutral-800 border-b border-l border-r ${
-              selectedDiv == "verbal"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-            } h-[30vh] flex justify-center overflow-y-auto`}
+            className={`bg-neutral-800 border-b border-l border-r ${selectedDiv == "verbal"
+              ? "border-neutral-500"
+              : "border-neutral-700"
+              } h-[30vh] flex justify-center overflow-y-auto`}
             style={{
               borderTopLeftRadius: "0",
               borderTopRightRadius: "0",
@@ -529,7 +524,7 @@ export default function Report(props) {
               {verbalScores.map((obj, index) => (
                 <div className="flex items-center w-full py-4" key={index}>
                   <p className="flex-grow text-left font-bold">{obj.name}</p>
-                  <p className="w-12 text-center mr-20">{`${obj.score}/100`}</p>
+                  <p className="w-12 text-center mr-20">{`${obj.score}`}</p>
                   <ProgressBar
                     value={obj.score}
                     color={"amber"}
@@ -550,11 +545,10 @@ export default function Report(props) {
           }}
         >
           <div
-            className={`bg-neutral-700 border-t border-l border-r ${
-              selectedDiv == "overall"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-            } h-[5vh]`}
+            className={`bg-neutral-700 border-t border-l border-r ${selectedDiv == "overall"
+              ? "border-neutral-500"
+              : "border-neutral-700"
+              } h-[5vh]`}
             style={{
               borderTopLeftRadius: "10px",
               borderTopRightRadius: "10px",
@@ -565,11 +559,10 @@ export default function Report(props) {
             <p className="p-2 font-bold">Overall</p>
           </div>
           <div
-            className={`bg-neutral-800 border-b border-l border-r ${
-              selectedDiv == "overall"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-            } h-[30vh] flex items-center justify-center`}
+            className={`bg-neutral-800 border-b border-l border-r ${selectedDiv == "overall"
+              ? "border-neutral-500"
+              : "border-neutral-700"
+              } h-[30vh] flex items-center justify-center`}
             style={{
               borderTopLeftRadius: "0",
               borderTopRightRadius: "0",
@@ -601,11 +594,10 @@ export default function Report(props) {
           }}
         >
           <div
-            className={`bg-neutral-700 border-t border-l border-r ${
-              selectedDiv == "feedback"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-            } h-[5vh]`}
+            className={`bg-neutral-700 border-t border-l border-r ${selectedDiv == "feedback"
+              ? "border-neutral-500"
+              : "border-neutral-700"
+              } h-[5vh]`}
             style={{
               borderTopLeftRadius: "10px",
               borderTopRightRadius: "10px",
@@ -616,11 +608,10 @@ export default function Report(props) {
             <p className="p-2 font-bold">Coach's Report</p>
           </div>
           <div
-            className={`bg-neutral-800 border-l border-r ${
-              selectedDiv == "feedback"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-            } h-[35vh] flex px-5 py-2 overflow-y-auto`}
+            className={`bg-neutral-800 border-l border-r ${selectedDiv == "feedback"
+              ? "border-neutral-500"
+              : "border-neutral-700"
+              } h-[35vh] flex px-5 py-2 overflow-y-auto`}
           >
             <div className="flex-col">
               {scoreDiscussion.map((msg, index) => (
@@ -629,19 +620,17 @@ export default function Report(props) {
                   dangerouslySetInnerHTML={{
                     __html: msg.content,
                   }}
-                  className={`py-1 whitespace-pre-wrap break-words ${
-                    msg.type === "gpt" ? "text-blue-300" : "text-white-300"
-                  }`}
+                  className={`py-1 whitespace-pre-wrap break-words ${msg.type === "gpt" ? "text-blue-300" : "text-white-300"
+                    }`}
                 ></p>
               ))}
             </div>
           </div>
           <div
-            className={`bg-neutral-800 border-b border-l border-r ${
-              selectedDiv == "feedback"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-            } bottom-0 left-0 w-full p-2 bg-neutral-800`}
+            className={`bg-neutral-800 border-b border-l border-r ${selectedDiv == "feedback"
+              ? "border-neutral-500"
+              : "border-neutral-700"
+              } bottom-0 left-0 w-full p-2 bg-neutral-800`}
             style={{
               borderTopLeftRadius: "0px",
               borderTopRightRadius: "0px",
@@ -678,11 +667,10 @@ export default function Report(props) {
           }}
         >
           <div
-            className={`bg-neutral-700 border-t border-l border-r ${
-              selectedDiv == "problems"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-            } h-[5vh]`}
+            className={`bg-neutral-700 border-t border-l border-r ${selectedDiv == "problems"
+              ? "border-neutral-500"
+              : "border-neutral-700"
+              } h-[5vh]`}
             style={{
               borderTopLeftRadius: "10px",
               borderTopRightRadius: "10px",
@@ -693,11 +681,10 @@ export default function Report(props) {
             <p className="p-2 font-bold">Keep Practicing</p>
           </div>
           <div
-            className={`bg-neutral-800 border-b border-l border-r ${
-              selectedDiv == "problems"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-            } h-[42vh] flex items-start justify-start overflow-y-auto`}
+            className={`bg-neutral-800 border-b border-l border-r ${selectedDiv == "problems"
+              ? "border-neutral-500"
+              : "border-neutral-700"
+              } h-[42vh] flex items-start justify-start overflow-y-auto`}
             style={{
               borderTopLeftRadius: "0",
               borderTopRightRadius: "0",

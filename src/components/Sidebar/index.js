@@ -18,7 +18,7 @@ const Sidebar = () => {
 
   useEffect(() => {
     console.log(location.pathname);
-    if (location.pathname === "/signup" || location.pathname === "/login" || location.pathname === "/") {
+    if (location.pathname === "/signup" || location.pathname === "/login" || location.pathname === "/" || location.pathname === "/interview" || location.pathname === "/report") {
       setSidebarOpen(false);
     }
     else {
