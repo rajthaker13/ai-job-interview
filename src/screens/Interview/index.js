@@ -356,6 +356,21 @@ export default function Interview(props) {
     }
   }, [outputDetails]);
 
+  // Add ref for chat container
+  const chatContainerRef = useRef(null);
+
+  // Add scroll to bottom function
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  };
+
+  // Add useEffect to scroll when conversation history updates
+  useEffect(() => {
+    scrollToBottom();
+  }, [conversationHistory]);
+
   // Component for the Topic Dropdown
   const TopicDropdown = ({ topics }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -478,18 +493,20 @@ export default function Interview(props) {
               <div className="p-4 border-b border-gray-800">
                 <h2 className="text-xl font-semibold text-white">Interview Chat</h2>
               </div>
-              <div className="flex-1 p-4 overflow-y-auto">
-                <div className="space-y-4">
+
+              {/* Add ref to the chat container */}
+              <div className="flex-1 overflow-y-auto" ref={chatContainerRef}>
+                <div className="p-4 space-y-4">
                   {conversationHistory.map((msg, index) => (
                     <div
                       key={index}
                       className={`p-3 rounded-lg ${msg.type === "gpt"
-                        ? "bg-blue-500/10 border border-blue-500/20"
-                        : msg.type === "user"
-                          ? "bg-purple-500/10 border border-purple-500/20"
-                          : msg.type === "error"
-                            ? "bg-red-500/10 border border-red-500/20"
-                            : "bg-green-500/10 border border-green-500/20"
+                          ? "bg-blue-500/10 border border-blue-500/20"
+                          : msg.type === "user"
+                            ? "bg-purple-500/10 border border-purple-500/20"
+                            : msg.type === "error"
+                              ? "bg-red-500/10 border border-red-500/20"
+                              : "bg-green-500/10 border border-green-500/20"
                         }`}
                     >
                       <p
@@ -500,7 +517,8 @@ export default function Interview(props) {
                   ))}
                 </div>
               </div>
-              <div className="p-4 border-t border-gray-800">
+
+              <div className="p-4 border-t border-gray-800 bg-[#0D0D1A] rounded-b-xl">
                 <input
                   type="text"
                   placeholder="Talk to your interviewer..."
