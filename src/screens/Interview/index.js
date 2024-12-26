@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { TextInput, Button } from "@tremor/react";
+import { TextInput, Button, Dialog, DialogPanel } from "@tremor/react";
 import { RiSearch2Line } from "@remixicon/react";
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -40,6 +40,13 @@ export default function Interview(props) {
 
   const location = useLocation();
   const leetcodeMatches = location.state || {};
+
+  const [testCasesPassed, setTestCasesPassed] = useState(false);
+  const [timeComplexityDiscussed, setTimeComplexityDiscussed] = useState(false);
+
+  const isQuestionComplete = () => {
+    return testCasesPassed && timeComplexityDiscussed;
+  };
 
   const startXResizing = (e) => {
     isXResizing.current = true;
@@ -267,36 +274,15 @@ export default function Interview(props) {
     });
 
     try {
-      const context = `Your name is Katie. You are a tech interviewer for a large software company. You are conducting a technical coding interview with a current or recently graduated university student.
-      If the student has already given you some of their personal information, do not ask for it again.
-      Here is the current conversation history. Use this as context: ${conversationString}
-      The problem given to the student is the following problem: ${leetcodeMatches ? leetcodeMatches[questionIndex].metadata.title : ""
-        } ${leetcodeMatches
-          ? leetcodeMatches[questionIndex].metadata.description
-          : ""
-        }. 
-      The student can see this problem and the visible test cases. You don't ever have to repeat the problem statement in its entirety. You can reference parts of it to answer questions though, of course.
-      Consider the optimal solution to the problem. The optimal solution is the one that has the best time and space complexity.
-      You are to act as an interviewer, not as AI helping the student. You may subtly nudge the student if their attempt is very far off from the correct answer, but let them do 90% of the work.
-      Let them fail if they cannot reach a solution. You are not meant to help the student, but to grade their ability and engage in a discussion about the problem. Don't give hints.
-      You should encourage the student to talk through their solution, discussing ideas and potential implementations.
-      If the student submits code to you, you are to grade it using the test cases in the problem description as well as new test cases you come up with. You don't need to display the test cases, just comment on whether the code passed the test case or not.
-      If the student has submitted code, ask the student what they think the time and space complexity of their implementation is. Have a discussion about it, but do not give them the answer. They must come to the answer themselves.
-      Run the students code and tell the student whether or not they passed all the test cases. If they did, but not optimally, ask if there is any room for time or space complexity improvement.
-      You should test all edge cases, check for compiler errors, runtime errors, and everything that would prevent the program from working correctly in an IDE.
-      If the student submits to you a question or asks for clarification on the problem, do you best to answer, but if the question simply asks you for an implementation or answer, state that that is the job of the student themself.
-      Don't include any LaTex style characters in your response. You can only use markdown elements and regular characters.
-      Keep your responses short. Don't go on and on, be succinct.
-      
-      Here is the latest iteration of the student's code: ${code}
-      If it is just the template/starter code, do not consider it.`;
+      const context = `You are conducting a technical interview. The candidate has ${testCasesPassed ? "passed" : "not passed"} all test cases.
+      If they have passed all test cases, your main goal is to briefly discuss time and space complexity and then conclude the question.
+      Once they correctly identify the time and space complexity, you should say "Great job! You've completed this question successfully." and nothing else.
+      If they haven't passed test cases yet, continue helping them work through the problem.
+      Here is the current conversation history for context: ${conversationString}`;
 
       let userPrompt = [
         { role: "system", content: context },
-        {
-          role: "user",
-          content: userMessage,
-        },
+        { role: "user", content: userMessage },
       ];
 
       const response = await openai.chat.completions.create({
@@ -306,10 +292,15 @@ export default function Interview(props) {
 
       const gptResponse = response.choices[0].message.content;
 
+      if (testCasesPassed && gptResponse.includes("Great job! You've completed this question successfully.")) {
+        setTimeComplexityDiscussed(true);
+      }
+
       setConversationHistory((prevHistory) => [
         ...prevHistory,
         { type: "gpt", content: markdownToHTML(gptResponse) },
       ]);
+
     } catch (error) {
       console.log(error);
     }
@@ -319,40 +310,61 @@ export default function Interview(props) {
     generateStarterCode();
   }, [language, questionIndex]);
 
-  useEffect(() => {
-    if (outputDetails && outputDetails.stdout) {
-      setConversationHistory((prevHistory) => [
-        ...prevHistory,
-        {
-          type: "code",
-          content: "Submitted Code (Compiled & Ran Successfully):\n" + code,
-        },
-        { type: "output", content: atob(outputDetails.stdout) },
-      ]);
-    } else if (outputDetails && outputDetails.stderr) {
-      setConversationHistory((prevHistory) => [
-        ...prevHistory,
-        {
-          type: "code",
-          content: "Submitted Code (Threw Error):\n" + code,
-        },
-        { type: "error", content: atob(outputDetails.stderr) },
-      ]);
-    } else if (outputDetails && outputDetails.compile_output) {
-      setConversationHistory((prevHistory) => [
-        ...prevHistory,
-        {
-          type: "code",
-          content: "Submitted Code (Threw Error):\n" + code,
-        },
-        { type: "error", content: atob(outputDetails.compile_output) },
-      ]);
-    }
+  // Add state for success modal
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  // Function to handle code feedback and progression
+  async function handleCodeFeedback(outputDetails) {
+    if (!outputDetails) return;
+
+    const allTestsPassed = outputDetails.status?.id === 3 && !outputDetails.compile_output && !outputDetails.stderr;
+
+    if (allTestsPassed) {
+      // Add success message to chat
+      setConversationHistory(prev => [...prev, {
+        type: "success",
+        content: "Great job! All test cases passed. Moving to the next question..."
+      }]);
+
+      // Show success modal
+      setShowSuccessModal(true);
+
+      // Wait 3 seconds then move to next question or end interview
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        if (questionIndex === 2) {
+          endInterview();
+        } else {
+          setQuestionIndex(prev => prev + 1);
+          setCode(""); // Reset code for next question
+          generateStarterCode(); // Generate new starter code
+        }
+      }, 3000);
+    } else {
+      // Provide feedback on failed test cases
+      let feedbackMessage = "Let's analyze your code:\n\n";
+
+      if (outputDetails.compile_output) {
+        feedbackMessage += "There seems to be a compilation error. Check your syntax.\n";
+        feedbackMessage += outputDetails.compile_output;
+      } else if (outputDetails.stderr) {
+        feedbackMessage += "Your code encountered an error during execution:\n";
+        feedbackMessage += outputDetails.stderr;
+      } else {
+        feedbackMessage += "Some test cases failed. Try to consider edge cases in your solution.";
+      }
+
+      setConversationHistory(prev => [...prev, {
+        type: "error",
+        content: feedbackMessage
+      }]);
+    }
+  }
+
+  // Update the useEffect that handles output
+  useEffect(() => {
     if (outputDetails) {
-      promptGPT(
-        "The student just submitted code. The code and output is above. Analyze the correctness and time complexity of the code and discuss with the student."
-      );
+      handleCodeFeedback(outputDetails);
     }
   }, [outputDetails]);
 
@@ -501,12 +513,12 @@ export default function Interview(props) {
                     <div
                       key={index}
                       className={`p-3 rounded-lg ${msg.type === "gpt"
-                          ? "bg-blue-500/10 border border-blue-500/20"
-                          : msg.type === "user"
-                            ? "bg-purple-500/10 border border-purple-500/20"
-                            : msg.type === "error"
-                              ? "bg-red-500/10 border border-red-500/20"
-                              : "bg-green-500/10 border border-green-500/20"
+                        ? "bg-blue-500/10 border border-blue-500/20"
+                        : msg.type === "user"
+                          ? "bg-purple-500/10 border border-purple-500/20"
+                          : msg.type === "error"
+                            ? "bg-red-500/10 border border-red-500/20"
+                            : "bg-green-500/10 border border-green-500/20"
                         }`}
                     >
                       <p
@@ -541,6 +553,48 @@ export default function Interview(props) {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      <Dialog
+        open={showSuccessModal}
+        onClose={() => { }}
+        static={true}
+      >
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+          <DialogPanel className="bg-[#0D0D1A] border border-green-500/20 p-6 rounded-xl max-w-md mx-auto transform transition-all">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4 bg-green-500/20 p-3 rounded-full">
+                <svg
+                  className="w-8 h-8 text-green-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                Question Completed Successfully!
+              </h3>
+              <p className="text-gray-400 mb-4">
+                {questionIndex === 2
+                  ? "Great job! Preparing your interview report..."
+                  : "Moving to the next question..."}
+              </p>
+              <div className="animate-pulse flex space-x-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              </div>
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
     </div>
   );
 }
