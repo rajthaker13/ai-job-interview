@@ -23,8 +23,7 @@ export default function Interview(props) {
   const [conversationHistory, setConversationHistory] = useState([
     {
       type: "gpt",
-      content:
-        "Hi, I'm Katie, and I'll be conducting your technical interview today. Let's get started! Please read over the problem and let me know if you have any clarifying questions. Remember to clearly explain your thought process throughout the interview. I'm here to help! Can you start by introducing yourself?",
+      content: "Hello! I'm your coding assistant. I'll help you solve the problems and provide feedback on your code. Feel free to ask questions about the problem or get hints if you're stuck. Let's begin with the first question!",
     },
   ]);
   const [code, setCode] = useState("");
@@ -267,18 +266,21 @@ export default function Interview(props) {
     }
   }
 
-  async function promptGPT(userMessage) {
-    let conversationString = "";
-    conversationHistory.map((convo) => {
-      conversationString += convo.type + ": " + convo.content + "\n";
-    });
+  useEffect(() => {
+    console.log("Q", leetcodeMatches[questionIndex]);
+  }, []);
 
+  async function promptGPT(userMessage) {
     try {
-      const context = `You are conducting a technical interview. The candidate has ${testCasesPassed ? "passed" : "not passed"} all test cases.
-      If they have passed all test cases, your main goal is to briefly discuss time and space complexity and then conclude the question.
-      Once they correctly identify the time and space complexity, you should say "Great job! You've completed this question successfully." and nothing else.
-      If they haven't passed test cases yet, continue helping them work through the problem.
-      Here is the current conversation history for context: ${conversationString}`;
+      const context = `You are a coding assistant helping with technical programming questions.
+      Current problem: ${leetcodeMatches[questionIndex]?.metadata?.title}
+      Your role is to:
+      1. Answer specific questions about the problem
+      2. Provide hints without giving away the solution
+      3. Help debug code issues
+      4. Suggest optimization techniques
+      
+      Keep responses focused on the technical problem. Don't ask personal questions.`;
 
       let userPrompt = [
         { role: "system", content: context },
@@ -313,46 +315,104 @@ export default function Interview(props) {
   // Add state for success modal
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Function to handle code feedback and progression
+  // Function to handle moving to next question
+  const moveToNextQuestion = () => {
+    setQuestionIndex(prev => prev + 1);
+    setCode(""); // Reset code
+    setTestCasesPassed(false); // Reset test case state
+    setOutputDetails(null); // Reset output details
+    generateStarterCode(); // Generate new starter code
+  };
+
+  // Function to analyze test cases with OpenAI
+  async function analyzeTestCases(outputDetails, code) {
+    try {
+      const currentQuestion = leetcodeMatches[questionIndex];
+      const context = `You are a code test case analyzer for LeetCode problems. 
+      
+      Problem: ${currentQuestion.metadata.title}
+      Description: ${currentQuestion.metadata.description}
+      Difficulty: ${currentQuestion.metadata.difficulty}
+      
+      User's Code:
+      ${code}
+      
+      Code Output:
+      ${atob(outputDetails.stdout)}
+      
+      Your task is to determine if this code correctly solves the problem and passes all test cases.
+      Consider:
+      1. Does the output match the expected format?
+      2. Does the solution handle all edge cases mentioned in the problem?
+      3. Does the code solve the core problem correctly?
+      
+      Return ONLY a JSON object in this exact format: {"passed": true/false, "reason": "brief explanation of why the code passed or failed"}`;
+
+      const response = await openai.chat.completions.create({
+        messages: [
+          { role: "system", content: "You are a strict LeetCode problem validator." },
+          { role: "user", content: context }
+        ],
+        model: "gpt-4o-mini",
+        temperature: 0.1
+      });
+
+      try {
+        const analysis = JSON.parse(response.choices[0].message.content.trim());
+        return analysis;
+      } catch (parseError) {
+        console.error("Failed to parse OpenAI response:", parseError);
+        return { passed: false, reason: "Error analyzing test cases" };
+      }
+    } catch (error) {
+      console.error("Error analyzing test cases:", error);
+      return { passed: false, reason: "Error analyzing test cases" };
+    }
+  }
+
+  // Updated handleCodeFeedback function
   async function handleCodeFeedback(outputDetails) {
     if (!outputDetails) return;
+    console.log("OUTPUT", outputDetails);
 
-    const allTestsPassed = outputDetails.status?.id === 3 && !outputDetails.compile_output && !outputDetails.stderr;
+    // Add raw output to chat
+    setConversationHistory(prev => [...prev, {
+      type: "output",
+      content: `<b>Code Output:</b>${atob(outputDetails.stdout)}`
+    }]);
 
-    if (allTestsPassed) {
+    // Analyze test cases with OpenAI using the current code
+    const analysis = await analyzeTestCases(outputDetails, code);
+
+    if (analysis.passed) {
       // Add success message to chat
       setConversationHistory(prev => [...prev, {
         type: "success",
-        content: "Great job! All test cases passed. Moving to the next question..."
+        content: "🎉 All test cases passed! Great job with this solution."
       }]);
 
-      // Show success modal
-      setShowSuccessModal(true);
-
-      // Wait 3 seconds then move to next question or end interview
+      // Wait 2 seconds to show the success message before showing modal
       setTimeout(() => {
-        setShowSuccessModal(false);
-        if (questionIndex === 2) {
-          endInterview();
-        } else {
-          setQuestionIndex(prev => prev + 1);
-          setCode(""); // Reset code for next question
-          generateStarterCode(); // Generate new starter code
-        }
-      }, 3000);
-    } else {
-      // Provide feedback on failed test cases
-      let feedbackMessage = "Let's analyze your code:\n\n";
+        setShowSuccessModal(true);
 
-      if (outputDetails.compile_output) {
-        feedbackMessage += "There seems to be a compilation error. Check your syntax.\n";
-        feedbackMessage += outputDetails.compile_output;
-      } else if (outputDetails.stderr) {
-        feedbackMessage += "Your code encountered an error during execution:\n";
-        feedbackMessage += outputDetails.stderr;
-      } else {
-        feedbackMessage += "Some test cases failed. Try to consider edge cases in your solution.";
-      }
+        // Wait 3 more seconds then move to next question or end interview
+        setTimeout(() => {
+          setShowSuccessModal(false);
+          if (questionIndex === 2) {
+            endInterview();
+          } else {
+            moveToNextQuestion();
+          }
+        }, 3000);
+      }, 2000);
+    } else {
+      // Provide specific feedback based on AI analysis
+      let feedbackMessage = "<b>Code Analysis:</b><br>";
+      feedbackMessage += `❌ ${analysis.reason}<br><br>`;
+      feedbackMessage += "Consider:<br>";
+      feedbackMessage += "- Review the problem requirements carefully<br>";
+      feedbackMessage += "- Test your solution against the example cases<br>";
+      feedbackMessage += "- Check for any edge cases in your implementation";
 
       setConversationHistory(prev => [...prev, {
         type: "error",
@@ -363,10 +423,17 @@ export default function Interview(props) {
 
   // Update the useEffect that handles output
   useEffect(() => {
-    if (outputDetails) {
+    if (outputDetails && outputDetails.stdout) {
       handleCodeFeedback(outputDetails);
     }
   }, [outputDetails]);
+
+  // Add useEffect to handle question changes
+  useEffect(() => {
+    setTestCasesPassed(false);
+    setOutputDetails(null);
+
+  }, [questionIndex]);
 
   // Add ref for chat container
   const chatContainerRef = useRef(null);

@@ -195,8 +195,8 @@ const Compiler = ({
           </button>
           <button
             className={`${questionIndex < 2
-                ? "rounded-md px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700"
-                : "bg-red-500 text-white rounded-lg px-4 py-2 text-sm"
+              ? "rounded-md px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700"
+              : "bg-red-500 text-white rounded-lg px-4 py-2 text-sm"
               }`}
             onClick={() => {
               if (questionIndex == 2) {

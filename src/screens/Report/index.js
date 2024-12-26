@@ -95,103 +95,93 @@ export default function Report(props) {
     }
 
     try {
-      const context = `Your name is Katie. You are a tech interviewer for a large software company. You have just completed a technical interview with the student. 
-      Here were the 3 problems: 
+      const context = `You are a technical interview performance analyzer. Analyze the candidate's coding performance based on:
+      1. Code correctness (test cases passed)
+      2. Solution efficiency (compared to optimal solution)
+      3. Time taken to reach solution
+      4. Code quality and readability
+
+      Here were the problems: 
       ${leetcodeMatches
           ? leetcodeMatches.map((question) => {
-            return (
-              question.metadata.title + ": " + question.metadata.description
-            );
+            return question.metadata.title + ": " + question.metadata.description;
           })
-          : ""
-        }. 
+          : ""}
 
-      Consider the optimal solution to the problems. The optimal solution is the one that has the best time and space complexity.
-      The student should have been talking through their solutions, discussing ideas and potential implementations.
-      Here is a transcript of the interview. The student is "user" and you, the interviewer, are "gpt". All code submission are labled "code", output of submissions that compiled and executed are labled "output", output of submissions that had compile/runtime errors are labled "error":
-      ${conversationString}
-      Consider the last version of code that the student submitted to you for each problem. You are to grade it using the test cases in the problem description as well as new test cases you come up with. If the student did not submit code, their score should be zero for that problem.
-      Your task now is to generate a report for the student. This interview was a practice mock interview, so you are to provide feedback that would most help the student in their interview preparation.
-      Consider the process the student took to arrive at the answer. Consider whether their answers were correct or not. Consider how much the student engaged in dialogue with you and showed you their though process.
-      If you are asked for numerical metrics or score, your response should be an integer, so that it can be easily parsed.
-      If you are asked for a text-based answer, your response should be short, easily readable, and you should always address the student directly, for example: 
-      "You need practice with dynamic programming style questions. I recommend you do more problems similar to the one you saw in the interview today."`;
+      Here is the interview transcript with timestamps. Code submissions are labeled "code", successful outputs are labeled "output", and errors are labeled "error":
+      ${conversationString}`;
 
       let technicalPrompt = [
         { role: "system", content: context },
         {
           role: "user",
           content:
-            "Based on the converstion, generate 4 technical categories to score the applicant on. These categories should not cover behavioral topics like communication. One of these categories should be 'Code', but the other two should by picked based on what was convered in the interview. For example, if the student was asked about the time and space complexity of their program, a relevant category to score them on might be 'Big-O'. Be creative and make it customized to the interview. All scores should be out of 100. Don't return scores in multiples of 5. Category names should be maximum 3 words. Return your answer in the following format and nothing else: [{name: String, score: int}, {name: String, score: int}, {name: String, score: int}]. All keys must be enclosed in double quotes to conform to JSON.parse function.",
+            "Generate exactly 4 technical scoring categories based on code performance metrics. Return ONLY a JSON array in this exact format, with no additional text: [{\"name\": \"Solution Correctness\", \"score\": 85}, {\"name\": \"Code Efficiency\", \"score\": 80}, {\"name\": \"Implementation Speed\", \"score\": 75}, {\"name\": \"Code Quality\", \"score\": 90}]. Use appropriate scores based on the interview performance.",
         },
       ];
 
       const technicalResponse = await openai.chat.completions.create({
         messages: technicalPrompt,
-        model: "gpt-4",
+        model: "gpt-4o-mini",
       });
 
-      setTechnicalScores(
-        JSON.parse(technicalResponse.choices[0].message.content)
-      );
-
-      let verbalPrompt = [
-        { role: "system", content: context },
-        {
-          role: "user",
-          content:
-            "Based on the converstion, generate 4 behavioral categories to score the applicant on. These should be non-technical and not be related coding or problem-solving. The student should be actively engaging with the interviewer throughout the interview, showing them their thought process. The student should also demonstrate the kind of team member they would be should they be hired. The categories should by picked based on what was convered in the interview. Be creative and make it customized to the interview. All scores should be out of 100. Do not return scores in multiples of 5. If the student is rude, mostly silent, or dismissive, dock their score significantly. It requires excellent communication skills, abundant kindness, and detailed insights into their thinking process to achieve a score near 100. Category names should be maximum 3 words. Return your answer in the following format and nothing else: [{name: String, score: int}, {name: String, score: int}, {name: String, score: int}]. All keys must be enclosed in double quotes to conform to JSON.parse function.",
-        },
-      ];
-
-      const verbalResponse = await openai.chat.completions.create({
-        messages: verbalPrompt,
-        model: "gpt-4",
-      });
-
-      setVerbalScores(JSON.parse(verbalResponse.choices[0].message.content));
+      try {
+        const parsedScores = JSON.parse(technicalResponse.choices[0].message.content.trim());
+        setTechnicalScores(parsedScores);
+      } catch (parseError) {
+        console.error("Failed to parse technical scores:", parseError);
+        // Fallback default scores
+        setTechnicalScores([
+          { name: "Solution Correctness", score: 0 },
+          { name: "Code Efficiency", score: 0 },
+          { name: "Implementation Speed", score: 0 },
+          { name: "Code Quality", score: 0 },
+        ]);
+      }
 
       let overallPrompt = [
         { role: "system", content: context },
         {
           role: "user",
           content:
-            "Generate an overall score out of 100 for the interview based on code correctness, code optimality, knowledge of big-O concepts, engagement with the interviewer, general problem solving skills, and pleasant attitude. If the student did not participate in the interview, return 0. Don't be afraid to weigh the behavioral aspects of the interview significantly. If the student is rude, mostly silent, or dismissive, dock their score significantly even if their code was correct. Return only an integer, nothing else.",
+            "Based on the technical performance metrics, return ONLY a number between 0 and 100 representing the overall score. Return just the number, nothing else.",
         },
       ];
 
       const overallResponse = await openai.chat.completions.create({
         messages: overallPrompt,
-        model: "gpt-4",
+        model: "gpt-4o-mini",
       });
 
-      setOverallScore(overallResponse.choices[0].message.content);
+      setOverallScore(parseInt(overallResponse.choices[0].message.content.trim(), 10) || 0);
 
       let discussionPrompt = [
         { role: "system", content: context },
         {
           role: "user",
-          content: `Write a list of 4 bullet-points highlighting the 4 most important points to help the student. Put line breaks between each bullet-point. You should focus 3 points on how the student can improve, and 1 point highlighting their strongest strength in the interview. These are the student's grades in specific categories: ${technicalScores} ${verbalScores} Return only these 4 bullet-points and nothing else. Each bullet-point should start a with title in bold, followed by an explanation`,
+          content: `Analyze the technical performance and return exactly 4 bullet points in this format:
+          • **Test Cases:** [Analysis of test case performance]
+          • **Solution Efficiency:** [Comparison to optimal solution]
+          • **Areas to Improve:** [Technical areas for improvement]
+          • **Technical Strengths:** [Best technical aspects shown]`,
         },
       ];
 
       const discussionResponse = await openai.chat.completions.create({
         messages: discussionPrompt,
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
       });
 
-      setShouldUpload(true);
       setScoreDicussion([
-        ...scoreDiscussion,
         {
           type: "gpt",
-          content: markdownToHTML(
-            discussionResponse.choices[0].message.content
-          ),
+          content: markdownToHTML(discussionResponse.choices[0].message.content),
         },
       ]);
+
+      setShouldUpload(true);
     } catch (error) {
-      console.log(error);
+      console.error("Error generating report:", error);
     }
   }
 
@@ -409,7 +399,7 @@ export default function Report(props) {
     }
 
     if (
-      verbalScores.length != 0 &&
+      // verbalScores.length != 0 &&
       technicalScores.length != 0 &&
       overallScore != 0 &&
       scoreDiscussion.length != 0 &&
