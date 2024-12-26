@@ -10,7 +10,7 @@ import userPic from "../../assets/user.png";
 
 export default function Interview(props) {
   const openai = new OpenAI({
-    apiKey: "sk-proj-bDhKwBhyKB0Del1D2IiPT3BlbkFJCAoB10kc39MQMqI5pD2V",
+    apiKey: process.env.REACT_APP_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true,
   });
 
@@ -382,7 +382,7 @@ export default function Interview(props) {
 
   return (
     <div
-      className="bg-[#05050D] text-white flex flex-row"
+      className="bg-[#05050D] min-h-screen pt-16"
       onMouseMove={resize}
       onMouseUp={() => {
         if (isXResizing) {
@@ -392,200 +392,137 @@ export default function Interview(props) {
           stopYResizing();
         }
       }}
-      style={{ height: "92vh", width: "100vw" }}
     >
-      <div
-        className={`bg-neutral-800 rounded-lg overflow-y-auto border ${selectedDiv === "problem"
-          ? "border-neutral-500"
-          : "border-neutral-700"
-          } p-4 ml-3 my-3`}
-        style={{ width: `${problemWidth}%`, minWidth: "20%" }}
-        onClick={() => setSelectedDiv("problem")}
-      >
-        <div
-          key={leetcodeMatches[questionIndex].metadata.title}
-          className="mb-4"
-        >
-          <h2 className="text-xl font-bold pb-1">
-            {leetcodeMatches[questionIndex].metadata.title}
-          </h2>
-          <div className="flex pb-3">
-            <p
-              className={`${getDifficultyColor(
-                leetcodeMatches[questionIndex].metadata.difficulty
-              )} font-bold pr-2 text-base mt-0.5`}
-            >
-              {leetcodeMatches[questionIndex].metadata.difficulty}
-            </p>
-            <TopicDropdown
-              topics={leetcodeMatches[questionIndex].metadata.related_topics}
-            />
-          </div>
-          <p
-            dangerouslySetInnerHTML={{
-              __html: formatDescription(
-                leetcodeMatches[questionIndex].metadata.description
-              ),
-            }}
-          ></p>
-          <br></br>
-          <a
-            href={leetcodeMatches[questionIndex].metadata.url}
-            className="text-blue-400 underline"
-            target="_blank"
-            rel="noopener noreferrer"
+      <div className="h-[calc(100vh-64px)] flex flex-col px-8">
+        <div className="flex flex-1 gap-6 h-full overflow-hidden">
+          {/* Left Panel - Problem Description */}
+          <div
+            className="bg-[#0D0D1A] rounded-xl border border-gray-800 overflow-y-auto"
+            style={{ width: `${problemWidth}%`, minWidth: "30%" }}
+            onClick={() => setSelectedDiv("problem")}
           >
-            View on Leetcode
-          </a>
-          <br></br>
-        </div>
-      </div>
-      <div
-        className="vertical-bar rounded w-0.5 h-[89vh] bg-neutral-700 hover:bg-blue-500 cursor-col-resize ml-1.5 mt-3 mb-3"
-        style={{
-          left: `${problemWidth}%`,
-        }}
-        onMouseDown={startXResizing}
-      ></div>
-      <div
-        className="flex flex-col mr-3"
-        style={{ width: `${editorWidth}%`, minWidth: "20%" }}
-      >
-        <div
-          className={`rounded-lg bg-neutral-800 border ${selectedDiv === "ide" ? "border-neutral-500" : "border-neutral-700"
-            } ml-1.5 mb-1.5 mt-3`}
-          style={{ height: `${ideHeight}%` }}
-          onClick={() => setSelectedDiv("ide")}
-        >
-          <Compiler
-            editorHeight={0.8 * ideHeight}
-            editorWidth={editorWidth - 10}
-            code={code}
-            setCode={setCode}
-            language={language}
-            setLanguage={setLanguage}
-            outputDetails={outputDetails}
-            setOutputDetails={setOutputDetails}
-            questionIndex={questionIndex}
-            setQuestionIndex={setQuestionIndex}
-            endInterview={endInterview}
+            <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl font-semibold text-white">
+                  {leetcodeMatches[questionIndex]?.metadata?.title}
+                </h2>
+                <span className={`px-3 py-1 rounded-lg text-sm font-medium ${leetcodeMatches[questionIndex]?.metadata?.difficulty === "Easy" ? "bg-green-500/20 text-green-400" :
+                  leetcodeMatches[questionIndex]?.metadata?.difficulty === "Medium" ? "bg-yellow-500/20 text-yellow-400" :
+                    "bg-red-500/20 text-red-400"
+                  }`}>
+                  {leetcodeMatches[questionIndex]?.metadata?.difficulty}
+                </span>
+              </div>
+              <a
+                href={leetcodeMatches[questionIndex]?.metadata?.url}
+                className="text-blue-400 hover:text-blue-300 transition-colors duration-200 text-sm"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View on Leetcode
+              </a>
+            </div>
+            <div className="p-4">
+              <div className="prose prose-invert max-w-none">
+                <div dangerouslySetInnerHTML={{
+                  __html: formatDescription(leetcodeMatches[questionIndex]?.metadata?.description)
+                }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Vertical Resize Bar */}
+          <div
+            className="w-1 hover:bg-blue-500 cursor-col-resize bg-gray-800 rounded"
+            onMouseDown={startXResizing}
           />
-        </div>
-        <div
-          className="rounded h-0.5 bg-neutral-700 hover:bg-blue-500 cursor-row-resize ml-2 mb-1.5"
-          onMouseDown={startYResizing}
-        ></div>
-        <div
-          className={`relative rounded-lg bg-neutral-800 border ${selectedDiv === "conversation"
-            ? "border-neutral-500"
-            : "border-neutral-700"
-            } ml-1.5 mb-3 flex flex-col`}
-          style={{
-            height: `${95 - ideHeight}%`,
-          }}
-          onClick={() => setSelectedDiv("conversation")}
-        >
-          <div className="p-2 overflow-y-auto flex-grow">
-            {conversationHistory.map((msg, index) => {
-              if (msg.type == "user" || msg.type == "gpt") {
-                return (
-                  <p
-                    key={index}
-                    className={`py-1 whitespace-pre-wrap break-words ${msg.type === "gpt" ? "text-blue-300" : "text-white"
-                      }`}
-                    dangerouslySetInnerHTML={{
-                      __html: msg.content,
-                    }}
-                  ></p>
-                );
-              } else if (msg.type == "output" || msg.type == "error") {
-                return (
-                  <p
-                    key={index}
-                    className={`py-1 whitespace-pre-wrap break-words ${msg.type == "error" ? "text-red-500" : "text-green-500"
-                      }`}
-                    dangerouslySetInnerHTML={{
-                      __html: "OUTPUT:<br>" + msg.content,
-                    }}
-                  ></p>
-                );
-              } else {
-                return "";
-              }
-            })}
-          </div>
-          <div className="rounded-lg bottom-0 left-0 w-full p-2 bg-neutral-800 flex-shrink-0">
-            <input
-              onKeyDown={async (event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  let temp = event.target.value;
-                  event.target.value = "";
-                  setConversationHistory((prevHistory) => [
-                    ...prevHistory,
-                    { type: "user", content: temp },
-                  ]);
-                  await promptGPT(temp);
-                }
-              }}
-              className="w-full p-2 rounded-lg border border-neutral-700 bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Talk to your interviewer..."
-              style={{ "--placeholder-color": "#a0aec0" }}
+
+          {/* Right Panel - Editor and Chat */}
+          <div
+            className="flex flex-col h-full"
+            style={{ width: `${editorWidth}%`, minWidth: "45%" }}
+            onClick={() => setSelectedDiv("editor")}
+          >
+            {/* Code Editor Container */}
+            <div
+              className="bg-[#0D0D1A] rounded-xl border border-gray-800 overflow-hidden"
+              style={{ height: `${ideHeight}%` }}
+            >
+              <Compiler
+                editorHeight={0.8 * ideHeight}
+                editorWidth={editorWidth - 10}
+                code={code}
+                setCode={setCode}
+                language={language}
+                setLanguage={setLanguage}
+                outputDetails={outputDetails}
+                setOutputDetails={setOutputDetails}
+                questionIndex={questionIndex}
+                setQuestionIndex={setQuestionIndex}
+                endInterview={endInterview}
+              />
+            </div>
+
+            {/* Horizontal Resize Bar */}
+            <div
+              className="h-1 my-3 hover:bg-blue-500 cursor-row-resize bg-gray-800 rounded"
+              onMouseDown={startYResizing}
             />
+
+            {/* Chat Interface */}
+            <div
+              className="flex flex-col bg-[#0D0D1A] rounded-xl border border-gray-800 overflow-hidden"
+              style={{ height: `${95 - ideHeight}%` }}
+              onClick={() => setSelectedDiv("chat")}
+            >
+              <div className="p-4 border-b border-gray-800">
+                <h2 className="text-xl font-semibold text-white">Interview Chat</h2>
+              </div>
+              <div className="flex-1 p-4 overflow-y-auto">
+                <div className="space-y-4">
+                  {conversationHistory.map((msg, index) => (
+                    <div
+                      key={index}
+                      className={`p-3 rounded-lg ${msg.type === "gpt"
+                        ? "bg-blue-500/10 border border-blue-500/20"
+                        : msg.type === "user"
+                          ? "bg-purple-500/10 border border-purple-500/20"
+                          : msg.type === "error"
+                            ? "bg-red-500/10 border border-red-500/20"
+                            : "bg-green-500/10 border border-green-500/20"
+                        }`}
+                    >
+                      <p
+                        dangerouslySetInnerHTML={{ __html: msg.content }}
+                        className="text-gray-300 whitespace-pre-wrap break-words"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="p-4 border-t border-gray-800">
+                <input
+                  type="text"
+                  placeholder="Talk to your interviewer..."
+                  className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  onKeyDown={async (event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      let temp = event.target.value;
+                      event.target.value = "";
+                      setConversationHistory((prevHistory) => [
+                        ...prevHistory,
+                        { type: "user", content: temp },
+                      ]);
+                      await promptGPT(temp);
+                    }
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <style jsx>{`
-        code {
-          background-color: #333;
-          border-radius: 5px;
-          padding: 2px 5px;
-          font-family: "Courier New", Courier, monospace;
-          color: #e0e0e0;
-        }
-        .no-select {
-          user-select: none;
-        }
-        .overflow-y-scroll {
-          overflow-y: scroll;
-        }
-        .overflow-x-hidden {
-          overflow-x: hidden;
-          word-wrap: break-word;
-        }
-        input::placeholder {
-          color: var(--placeholder-color);
-        }
-        h1 {
-          font-size: 1.75em;
-          font-weight: bold;
-        }
-
-        h2 {
-          font-size: 1.5em;
-          font-weight: bold;
-        }
-
-        h3 {
-          font-size: 1.25em;
-          font-weight: bold;
-        }
-
-        h4 {
-          font-size: 1em;
-          font-weight: bold;
-        }
-
-        h5 {
-          font-size: 0.875em;
-          font-weight: bold;
-        }
-
-        h6 {
-          font-size: 0.75em;
-          font-weight: bold;
-        }
-      `}</style>
     </div>
   );
 }

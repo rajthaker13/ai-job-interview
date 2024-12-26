@@ -13,7 +13,7 @@ import TableOne from "../../components/Tables/TableOne";
 
 export default function Home(props) {
   const openai = new OpenAI({
-    apiKey: "sk-proj-bDhKwBhyKB0Del1D2IiPT3BlbkFJCAoB10kc39MQMqI5pD2V",
+    apiKey: process.env.REACT_APP_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true,
   });
   const pinecone = new Pinecone({

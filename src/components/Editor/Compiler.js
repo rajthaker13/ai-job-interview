@@ -178,73 +178,55 @@ const Compiler = ({
   };
 
   return (
-    <div className="rounded-lg bg-neutral-800 flex flex-col h-[95%] overflow-y-auto">
-      <div className="flex flex-row space-x-20 px-4 py-4">
-        <div className="flex flex-col flex-grow min-w-0">
-          <div className="flex flex-row mb-4">
-            <LanguagesDropdown onSelectChange={onSelectChange} />
-            <div className="pl-4">
-              <ThemeDropdown
-                handleThemeChange={handleThemeChange}
-                theme={theme}
-              />
-            </div>
-            <button
-              onClick={handleCompile}
-              disabled={!code}
-              className={classnames(
-                "z-10 rounded-md ml-3 px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 flex-shrink-0",
-                !code ? "opacity-50" : ""
-              )}
-            >
-              {processing ? "Processing..." : "Compile and Execute"}
-            </button>
-            <button
-              className={`${
-                questionIndex < 2
-                  ? "z-10 rounded-md ml-3 px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 flex-shrink-0"
-                  : ""
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex-none px-4 py-4">
+        <div className="flex items-center gap-4">
+          <LanguagesDropdown onSelectChange={onSelectChange} />
+          <ThemeDropdown handleThemeChange={handleThemeChange} theme={theme} />
+          <button
+            onClick={handleCompile}
+            disabled={!code}
+            className={classnames(
+              "rounded-md px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700",
+              !code ? "opacity-50" : ""
+            )}
+          >
+            {processing ? "Processing..." : "Compile and Execute"}
+          </button>
+          <button
+            className={`${questionIndex < 2
+                ? "rounded-md px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700"
+                : "bg-red-500 text-white rounded-lg px-4 py-2 text-sm"
               }`}
-              style={
-                questionIndex == 2
-                  ? {
-                      backgroundColor: "#FF4D4D",
-                      color: "white",
-                      borderRadius: "8px",
-                      padding: "6px 12px",
-                      border: "none",
-                      fontSize: "13px",
-                      marginLeft: "15px",
-                    }
-                  : {}
+            onClick={() => {
+              if (questionIndex == 2) {
+                endInterview();
+              } else {
+                setQuestionIndex(questionIndex + 1);
               }
-              onClick={() => {
-                if (questionIndex == 2) {
-                  endInterview();
-                } else {
-                  setQuestionIndex(questionIndex + 1);
-                }
-              }}
-            >
-              {questionIndex < 2 ? "Next Question" : "End Interview"}
-            </button>
-          </div>
-
-          <div className="flex flex-row">
-            <CodeEditorWindow
-              code={code}
-              onChange={onChange}
-              language={language?.value}
-              theme={theme.value}
-              height={editorHeight}
-              width={editorWidth}
-            />
-            <div className="flex flex-col items-end text-right">
-              {outputDetails && <OutputDetails outputDetails={outputDetails} />}
-            </div>
-          </div>
+            }}
+          >
+            {questionIndex < 2 ? "Next Question" : "End Interview"}
+          </button>
         </div>
       </div>
+
+      <div className="flex-1 overflow-hidden">
+        <CodeEditorWindow
+          code={code}
+          onChange={onChange}
+          language={language?.value}
+          theme={theme.value}
+          height={editorHeight}
+          width={editorWidth}
+        />
+      </div>
+
+      {outputDetails && (
+        <div className="flex-none p-4 border-t border-gray-800">
+          <OutputDetails outputDetails={outputDetails} />
+        </div>
+      )}
     </div>
   );
 };

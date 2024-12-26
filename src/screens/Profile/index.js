@@ -7,7 +7,7 @@ import { Button, Dialog, DialogPanel } from "@tremor/react";
 
 export default function Profile(props) {
   const openai = new OpenAI({
-    apiKey: "sk-proj-bDhKwBhyKB0Del1D2IiPT3BlbkFJCAoB10kc39MQMqI5pD2V",
+    apiKey: process.env.REACT_APP_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true,
   });
 

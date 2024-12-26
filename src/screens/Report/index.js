@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Report(props) {
   const openai = new OpenAI({
-    apiKey: "sk-proj-bDhKwBhyKB0Del1D2IiPT3BlbkFJCAoB10kc39MQMqI5pD2V",
+    apiKey: process.env.REACT_APP_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true,
   });
 
@@ -196,7 +196,8 @@ export default function Report(props) {
   }
 
   async function uploadReport() {
-    const uid = localStorage.getItem("uid");
+    const { data: { user } } = await props.db.auth.getUser()
+    const uid = user.id
     let conversationString = "";
     if (conversationHistory[0]) {
       conversationHistory.map((convo) => {
@@ -259,7 +260,8 @@ export default function Report(props) {
   }
 
   async function pullReport(interviewIdx) {
-    const uid = localStorage.getItem("uid");
+    const { data: { user } } = await props.db.auth.getUser()
+    const uid = user.id
 
     const { data, error } = await props.db
       .from("users")
@@ -276,7 +278,8 @@ export default function Report(props) {
   }
 
   async function isNewReport() {
-    const uid = localStorage.getItem("uid");
+    const { data: { user } } = await props.db.auth.getUser()
+    const uid = user.id
 
     const { data, error } = await props.db
       .from("users")

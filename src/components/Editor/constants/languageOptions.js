@@ -143,12 +143,12 @@ export const languageOptions = [
   //     label: "Fortran (GFortran 9.2.0)",
   //     value: "fortran",
   //   },
-  {
-    id: 60,
-    name: "Go (1.13.5)",
-    label: "Go (1.13.5)",
-    value: "go",
-  },
+  // {
+  //   id: 60,
+  //   name: "Go (1.13.5)",
+  //   label: "Go (1.13.5)",
+  //   value: "go",
+  // },
   //   {
   //     id: 88,
   //     name: "Groovy (3.0.3)",
@@ -162,12 +162,12 @@ export const languageOptions = [
   //     value: "haskell",
   //   },
 
-  {
-    id: 78,
-    name: "Kotlin (1.3.70)",
-    label: "Kotlin",
-    value: "kotlin",
-  },
+  // {
+  //   id: 78,
+  //   name: "Kotlin (1.3.70)",
+  //   label: "Kotlin",
+  //   value: "kotlin",
+  // },
   // {
   //   id: 64,
   //   name: "Lua (5.3.5)",
@@ -175,12 +175,12 @@ export const languageOptions = [
   //   value: "lua",
   // },
 
-  {
-    id: 79,
-    name: "Objective-C (Clang 7.0.1)",
-    label: "Objective-C (Clang 7.0.1)",
-    value: "objectivec",
-  },
+  // {
+  //   id: 79,
+  //   name: "Objective-C (Clang 7.0.1)",
+  //   label: "Objective-C (Clang 7.0.1)",
+  //   value: "objectivec",
+  // },
   //   {
   //     id: 65,
   //     name: "OCaml (4.09.0)",
@@ -205,12 +205,12 @@ export const languageOptions = [
   //     label: "Perl (5.28.1)",
   //     value: "perl",
   //   },
-  {
-    id: 68,
-    name: "PHP (7.4.1)",
-    label: "PHP",
-    value: "php",
-  },
+  // {
+  //   id: 68,
+  //   name: "PHP (7.4.1)",
+  //   label: "PHP",
+  //   value: "php",
+  // },
   //   {
   //     id: 43,
   //     label: "Plain Text",
@@ -235,18 +235,18 @@ export const languageOptions = [
   //     label: "R (4.0.0)",
   //     value: "r",
   //   },
-  {
-    id: 72,
-    name: "Ruby (2.7.0)",
-    label: "Ruby",
-    value: "ruby",
-  },
-  {
-    id: 73,
-    name: "Rust (1.40.0)",
-    label: "Rust",
-    value: "rust",
-  },
+  // {
+  //   id: 72,
+  //   name: "Ruby (2.7.0)",
+  //   label: "Ruby",
+  //   value: "ruby",
+  // },
+  // {
+  //   id: 73,
+  //   name: "Rust (1.40.0)",
+  //   label: "Rust",
+  //   value: "rust",
+  // },
   // {
   //   id: 81,
   //   name: "Scala (2.13.2)",
@@ -259,12 +259,12 @@ export const languageOptions = [
   //     label: "SQL (SQLite 3.27.2)",
   //     value: "sql",
   //   },
-  {
-    id: 83,
-    name: "Swift (5.2.3)",
-    label: "Swift (5.2.3)",
-    value: "swift",
-  },
+  // {
+  //   id: 83,
+  //   name: "Swift (5.2.3)",
+  //   label: "Swift (5.2.3)",
+  //   value: "swift",
+  // },
   {
     id: 74,
     name: "TypeScript (3.7.4)",
