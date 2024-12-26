@@ -170,7 +170,10 @@ export default function Profile(props) {
   }
 
   async function getUserData() {
-    const uid = localStorage.getItem("uid");
+    const { data: { user } } = await props.db.auth.getUser()
+    console.log("user", user)
+    const uid = user.id
+
 
     try {
       const { data, error } = await props.db
@@ -198,6 +201,12 @@ export default function Profile(props) {
         }
         setReportString(tempString);
         setOverallScore(Math.round(overall / data[0].interviews.length));
+      }
+      else {
+        await props.db.from("users").insert({
+          uid: uid,
+        });
+
       }
     } catch (error) { }
   }
@@ -241,9 +250,7 @@ export default function Profile(props) {
 
   useEffect(() => {
     getUserData();
-  }, []);
 
-  useEffect(() => {
     const handleResize = () => {
       setRadius(calculateRadius());
     };
@@ -253,376 +260,184 @@ export default function Profile(props) {
 
     // Add resize event listener
     window.addEventListener("resize", handleResize);
-  });
+  }, []);
+
+
 
   return (
-    <div className="bg-neutral-800 text-white flex-col flex">
-      <div className="flex justify-center">
-        <div
-          className="flex-col w-[40vw]"
-          onMouseEnter={() => {
-            setSelectedDiv("feedback");
-          }}
-          onMouseLeave={() => {
-            setSelectedDiv("");
-          }}
-        >
-          <div
-            className={`bg-neutral-700 border-t border-l border-r ${selectedDiv == "feedback"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } h-[5vh]`}
-            style={{
-              borderTopLeftRadius: "10px",
-              borderTopRightRadius: "10px",
-              borderBottomRightRadius: "0",
-              borderBottomLeftRadius: "0",
-            }}
-          >
-            <p className="p-2 font-bold">Coach's Report</p>
+    <div className="bg-[#05050D] min-h-screen pt-16 pl-64">
+      <div className="h-[calc(100vh-64px)] flex flex-col px-8">
+        {/* Welcome Section with Start Interview Button */}
+        <div className="py-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Welcome back!</h1>
+            <p className="text-gray-400">Track your interview progress and get personalized coaching</p>
           </div>
-          <div
-            className={`bg-neutral-800 border-l border-r ${selectedDiv == "feedback"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } h-[80vh] flex px-5 py-2 overflow-y-auto`}
+          <button
+            onClick={() => setOpenModal(true)}
+            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg text-white font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2"
           >
-            <div className="flex-col">
-              {scoreDiscussion.map((msg, index) => (
-                <p
-                  key={index}
-                  dangerouslySetInnerHTML={{
-                    __html: msg.content,
-                  }}
-                  className={`py-1 whitespace-pre-wrap break-words ${msg.type === "gpt" ? "text-blue-300" : "text-white-300"
-                    }`}
-                ></p>
-              ))}
-            </div>
-          </div>
-          <div
-            className={`bg-neutral-800 border-b border-l border-r ${selectedDiv == "feedback"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } bottom-0 left-0 w-full p-2 bg-neutral-800`}
-            style={{
-              borderTopLeftRadius: "0px",
-              borderTopRightRadius: "0px",
-              borderBottomRightRadius: "10px",
-              borderBottomLeftRadius: "10px",
-            }}
-          >
-            <input
-              onKeyDown={async (event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  let temp = event.target.value;
-                  event.target.value = "";
-                  setScoreDicussion((prevHistory) => [
-                    ...prevHistory,
-                    { type: "user", content: markdownToHTML(temp) },
-                  ]);
-                  await chatWithCoach(temp);
-                }
-              }}
-              className="w-full h-[5vh] rounded-lg border border-neutral-700 bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Chat with your coach..."
-              style={{ "--placeholder-color": "#a0aec0" }}
-            />
-          </div>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Start New Interview
+          </button>
         </div>
-        <div
-          className="flex-col w-[50vw] ml-3"
-          onMouseEnter={() => {
-            setSelectedDiv("reports");
-          }}
-          onMouseLeave={() => {
-            setSelectedDiv("");
-          }}
-        >
-          <div
-            className={`bg-neutral-700 border-t border-l border-r ${selectedDiv == "reports"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } h-[5vh]`}
-            style={{
-              borderTopLeftRadius: "10px",
-              borderTopRightRadius: "10px",
-              borderBottomRightRadius: "0",
-              borderBottomLeftRadius: "0",
-            }}
-          >
-            <p className="p-2 font-bold">Interview Reports</p>
-          </div>
-          <div
-            className={`bg-neutral-800 border-b border-l border-r ${selectedDiv == "reports"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } h-[86vh] flex justify-center overflow-y-auto`}
-            style={{
-              borderTopLeftRadius: "0",
-              borderTopRightRadius: "0",
-              borderBottomRightRadius: "10px",
-              borderBottomLeftRadius: "10px",
-            }}
-          >
-            <div className="flex-col p-4 w-full">
-              {interviews.length === 0 ? (
-                <p className="text-neutral-500 text-center">
-                  You don't have any interview history. Press "Start Interview"
-                  to try out your first mock interview.
-                </p>
-              ) : (
-                interviews.map((interview, index) => (
-                  <div className="flex items-center w-full py-3" key={index}>
-                    <button
-                      className="bg-neutral-700 w-full flex items-center justify-between"
-                      style={{
-                        color: "white",
-                        borderRadius: "8px",
-                        padding: "15px 12px",
-                        border: "none",
-                        fontSize: "16px",
-                      }}
-                      onClick={() => {
-                        seeReport(
-                          interview.id,
-                          interview.questions,
-                          interview.transcript
-                        );
-                      }}
-                    >
-                      <p className="text-left font-bold flex-grow">
-                        Technical Interview
-                      </p>
-                      <p className="text-center w-1/3">
-                        {formatDate(interview.date)}
-                      </p>
-                      <p
-                        className={`text-right font-bold ${interview.report.overallScore < 40
-                          ? "text-red-500"
-                          : interview.report.overallScore < 70
-                            ? "text-orange-500"
-                            : "text-green-500"
-                          }`}
-                      >
-                        {interview.report.overallScore}
-                      </p>
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="flex-col w-[25vw] ml-3">
-          <div
-            className="flex-col"
-            onMouseEnter={() => {
-              setSelectedDiv("overall");
-            }}
-            onMouseLeave={() => {
-              setSelectedDiv("");
-            }}
-          >
-            <div
-              className={`bg-neutral-700 border-t border-l border-r ${selectedDiv == "overall"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-                } h-[5vh]`}
-              style={{
-                borderTopLeftRadius: "10px",
-                borderTopRightRadius: "10px",
-                borderBottomRightRadius: "0",
-                borderBottomLeftRadius: "0",
-              }}
-            >
-              <p className="p-2 font-bold">Overall</p>
-            </div>
-            <div
-              className={`bg-neutral-800 border-b border-l border-r ${selectedDiv == "overall"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-                } h-[33vh] flex items-center justify-center`}
-              style={{
-                borderTopLeftRadius: "0",
-                borderTopRightRadius: "0",
-                borderBottomRightRadius: "10px",
-                borderBottomLeftRadius: "10px",
-              }}
-            >
-              <ProgressCircle
-                value={overallScore}
-                color={"fuchsia"}
-                radius={radius}
-                strokeWidth={6}
-              >
-                <span className="text-white text-3xl font-bold">
-                  {overallScore}
-                </span>
-              </ProgressCircle>
-            </div>
-          </div>
-          <div
-            className="flex-col"
-            onMouseEnter={() => {
-              setSelectedDiv("practice");
-            }}
-            onMouseLeave={() => {
-              setSelectedDiv("");
-            }}
-          >
-            <div
-              className={`bg-neutral-700 border-t border-l border-r mt-3 ${selectedDiv == "practice"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-                } h-[5vh]`}
-              style={{
-                borderTopLeftRadius: "10px",
-                borderTopRightRadius: "10px",
-                borderBottomRightRadius: "0",
-                borderBottomLeftRadius: "0",
-              }}
-            >
-              <p className="p-2 font-bold">More Practice</p>
-            </div>
-            <div
-              className={`bg-neutral-800 border-b border-l border-r ${selectedDiv == "practice"
-                ? "border-neutral-500"
-                : "border-neutral-700"
-                } h-[33vh] flex`}
-              style={{
-                borderTopLeftRadius: "0",
-                borderTopRightRadius: "0",
-                borderBottomRightRadius: "10px",
-                borderBottomLeftRadius: "10px",
-              }}
-            >
-              {interviews.length > 0 &&
-                (() => {
-                  // Find the interview with the lowest score
-                  const lowestScoreInterview = interviews.reduce(
-                    (lowest, current) => {
-                      return current.report.overallScore <
-                        lowest.report.overallScore
-                        ? current
-                        : lowest;
-                    },
-                    interviews[0]
-                  );
 
-                  return (
-                    <div className="p-4 w-full">
-                      <p className="font-bold text-lg">Trouble Questions:</p>
-                      {lowestScoreInterview.questions.map((question, index) => (
-                        <div key={index} className="flex items-center mb-3">
-                          <a
-                            href={question.metadata.url}
-                            className="pr-3 block"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {question.metadata.title}
-                          </a>
-                          <div
-                            className={`inline-block rounded-full font-bold bg-neutral-700 px-2 py-1 ${getDifficultyColor(
-                              question.metadata.difficulty
-                            )}`}
-                          >
-                            {question.metadata.difficulty}
+        {/* Main Content */}
+        <div className="flex-1 grid grid-rows-[auto_1fr] gap-6">
+          {/* Stats Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-xl p-4 border border-gray-800">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-white">Total Interviews</h2>
+                <span className="text-2xl font-bold text-purple-400">{interviews.length}</span>
+              </div>
+              <div className="mt-2 h-2 bg-gray-700 rounded-full">
+                <div
+                  className="h-2 bg-purple-500 rounded-full"
+                  style={{ width: `${(interviews.length / 10) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl p-4 border border-gray-800">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-white">Average Score</h2>
+                <span className="text-2xl font-bold text-blue-400">{overallScore || 0}</span>
+              </div>
+              <div className="mt-2 h-2 bg-gray-700 rounded-full">
+                <div
+                  className="h-2 bg-blue-500 rounded-full"
+                  style={{ width: `${overallScore}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-cyan-500/10 to-emerald-500/10 rounded-xl p-4 border border-gray-800">
+              <div className="flex flex-col items-center justify-center">
+                <h2 className="text-lg font-semibold text-white mb-2">Overall Progress</h2>
+                <ProgressCircle value={overallScore} color="cyan" radius={40} strokeWidth={8}>
+                  <span className="text-2xl font-bold text-white">{overallScore || 'N/A'}</span>
+                </ProgressCircle>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+            {/* Coach's Report */}
+            <div className="bg-[#0D0D1A] rounded-xl border border-gray-800 flex flex-col">
+              <div className="p-4 border-b border-gray-800">
+                <h2 className="text-xl font-semibold text-white">Coach's Report</h2>
+              </div>
+              <div className="flex-1 p-4 overflow-y-auto">
+                <div className="space-y-4">
+                  {scoreDiscussion.map((msg, index) => (
+                    <div
+                      key={index}
+                      className={`p-3 rounded-lg ${msg.type === "gpt"
+                        ? "bg-blue-500/10 border border-blue-500/20"
+                        : "bg-purple-500/10 border border-purple-500/20"
+                        }`}
+                    >
+                      <p
+                        dangerouslySetInnerHTML={{ __html: msg.content }}
+                        className="text-gray-300 whitespace-pre-wrap break-words"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="p-4 border-t border-gray-800">
+                <input
+                  onKeyDown={async (event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      let temp = event.target.value;
+                      event.target.value = "";
+                      setScoreDicussion((prevHistory) => [
+                        ...prevHistory,
+                        { type: "user", content: markdownToHTML(temp) },
+                      ]);
+                      await chatWithCoach(temp);
+                    }
+                  }}
+                  className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  placeholder="Ask your coach anything..."
+                />
+              </div>
+            </div>
+
+            {/* Interview Reports */}
+            <div className="bg-[#0D0D1A] rounded-xl border border-gray-800 flex flex-col">
+              <div className="p-4 border-b border-gray-800">
+                <h2 className="text-xl font-semibold text-white">Interview Reports</h2>
+              </div>
+              <div className="flex-1 p-4 overflow-y-auto">
+                {interviews.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center">
+                    <div className="bg-blue-500/10 p-6 rounded-full mb-4">
+                      <svg className="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-400">No interview history yet</p>
+                    <p className="text-gray-500 text-sm mt-2">Start your first mock interview to begin tracking your progress</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {interviews.map((interview, index) => (
+                      <button
+                        key={index}
+                        onClick={() => seeReport(interview.id, interview.questions, interview.transcript)}
+                        className="w-full p-4 bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg hover:from-gray-800 hover:to-gray-700 transition-all duration-200"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-white font-semibold">Technical Interview</p>
+                            <p className="text-gray-400 text-sm">{formatDate(interview.date)}</p>
+                          </div>
+                          <div className={`px-4 py-2 rounded-full ${interview.report.overallScore < 40 ? "bg-red-500/20 text-red-400" :
+                            interview.report.overallScore < 70 ? "bg-yellow-500/20 text-yellow-400" :
+                              "bg-green-500/20 text-green-400"
+                            }`}>
+                            {interview.report.overallScore}%
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  );
-                })()}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <Button
-            className="mt-12 w-full h-[8vh]"
-            onClick={() => setOpenModal(true)}
-          >
-            Start Your Interview
-          </Button>
         </div>
       </div>
-      <Dialog
-        open={openModal}
-        onClose={(val) => setOpenModal(val)}
-        static={true}
-      >
-        <DialogPanel>
-          <h3 className="text-lg font-semibold text-tremor-content-strong dark:text-dark-tremor-content-strong">
-            Let's Begin Your Technical Interview
-          </h3>
-          <p className="mt-2 leading-6 text-tremor-default text-tremor-content dark:text-dark-tremor-content">
-            Please paste the job description of a role you are interested in
-            below to generate the most appropriate questions, or describe the
-            role your after in plain English.
+
+      {/* Modal */}
+      <Dialog open={openModal} onClose={(val) => setOpenModal(val)} static={true}>
+        <DialogPanel className="bg-[#0D0D1A] border border-gray-800 p-6 rounded-xl">
+          <h3 className="text-xl font-semibold text-white mb-4">Start Your Technical Interview</h3>
+          <p className="text-gray-400 mb-4">
+            Paste a job description or describe the role you're interested in to generate relevant interview questions.
           </p>
           <textarea
             value={jobDescription}
-            onChange={(e) => {
-              setJobDescription(e.target.value);
-            }}
-            className="border rounded-md p-2 h-[20vh] w-full mt-4 text-black"
-          ></textarea>
-          <Button
-            className="mt-8 w-full"
-            onClick={async () => {
-              await getLeetcodeProblems();
-            }}
-          >
-            Submit
-          </Button>
+            onChange={(e) => setJobDescription(e.target.value)}
+            className="w-full h-32 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 mb-4"
+            placeholder="Enter job description..."
+          />
+          <div className="flex justify-end">
+            <button
+              onClick={async () => await getLeetcodeProblems()}
+              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg text-white font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+            >
+              Generate Questions
+            </button>
+          </div>
         </DialogPanel>
       </Dialog>
-
-      <style jsx>{`
-        code {
-          background-color: #333;
-          border-radius: 5px;
-          padding: 2px 5px;
-          font-family: "Courier New", Courier, monospace;
-          color: #e0e0e0;
-        }
-        .overflow-y-scroll {
-          overflow-y: scroll;
-        }
-        .overflow-x-hidden {
-          overflow-x: hidden;
-          word-wrap: break-word;
-        }
-        h1 {
-          font-size: 1.75em;
-          font-weight: bold;
-        }
-
-        h2 {
-          font-size: 1.5em;
-          font-weight: bold;
-        }
-
-        h3 {
-          font-size: 1.25em;
-          font-weight: bold;
-        }
-
-        h4 {
-          font-size: 1em;
-          font-weight: bold;
-        }
-
-        h5 {
-          font-size: 0.875em;
-          font-weight: bold;
-        }
-
-        h6 {
-          font-size: 0.75em;
-          font-weight: bold;
-        }
-      `}</style>
     </div>
   );
 }
