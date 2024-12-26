@@ -432,368 +432,95 @@ export default function Report(props) {
   });
 
   return (
-    <div
-      className="bg-[#05050D] text-white flex-col pt-1 pb-3"
-      style={{ height: "92vh", width: "100vw" }}
-    >
-      {/*<p className="font-bold text-4xl pl-6 pt-6 pb-3">Your Interview Report</p>*/}
-      <div className="flex justify-center mt-5">
-        <div
-          className="flex-col w-[40vw] ml-5"
-          onMouseEnter={() => {
-            setSelectedDiv("technical");
-          }}
-          onMouseLeave={() => {
-            setSelectedDiv("");
-          }}
-        >
-          <div
-            className={`bg-neutral-700 border-t border-l border-r ${selectedDiv == "technical"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } h-[5vh]`}
-            style={{
-              borderTopLeftRadius: "10px",
-              borderTopRightRadius: "10px",
-              borderBottomRightRadius: "0",
-              borderBottomLeftRadius: "0",
-            }}
-          >
-            <p className="p-2 font-bold">Technical Score</p>
+    <div className="bg-[#05050D] min-h-screen pt-16 h-screen overflow-hidden">
+      <div className="h-[calc(100vh-64px)] flex flex-col px-8 pb-8">
+        {/* Header Section */}
+        <div className="py-4 flex justify-between items-center flex-shrink-0">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Interview Report</h1>
+            <p className="text-gray-400">Review your performance and get personalized feedback</p>
           </div>
-          <div
-            className={`bg-neutral-800 border-b border-l border-r ${selectedDiv == "technical"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } h-[30vh] flex justify-center overflow-y-auto`}
-            style={{
-              borderTopLeftRadius: "0",
-              borderTopRightRadius: "0",
-              borderBottomRightRadius: "10px",
-              borderBottomLeftRadius: "10px",
-            }}
+          <button
+            onClick={() => navigate('/profile')}
+            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg text-white font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
-            <div className="flex-col p-4 w-full">
-              {technicalScores.map((obj, index) => (
-                <div className="flex items-center w-full py-4" key={index}>
-                  <p className="flex-grow text-left font-bold">{obj.name}</p>
-                  <p className="w-12 text-center mr-20">{`${obj.score}`}</p>
-                  <ProgressBar
-                    value={obj.score}
-                    color={"teal"}
-                    className="w-[40%]"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+            Finish Interview
+          </button>
         </div>
-        <div
-          className="flex-col w-[40vw] ml-3"
-          onMouseEnter={() => {
-            setSelectedDiv("verbal");
-          }}
-          onMouseLeave={() => {
-            setSelectedDiv("");
-          }}
-        >
-          <div
-            className={`bg-neutral-700 border-t border-l border-r ${selectedDiv == "verbal"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } h-[5vh]`}
-            style={{
-              borderTopLeftRadius: "10px",
-              borderTopRightRadius: "10px",
-              borderBottomRightRadius: "0",
-              borderBottomLeftRadius: "0",
-            }}
-          >
-            <p className="p-2 font-bold">Verbal Score</p>
-          </div>
-          <div
-            className={`bg-neutral-800 border-b border-l border-r ${selectedDiv == "verbal"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } h-[30vh] flex justify-center overflow-y-auto`}
-            style={{
-              borderTopLeftRadius: "0",
-              borderTopRightRadius: "0",
-              borderBottomRightRadius: "10px",
-              borderBottomLeftRadius: "10px",
-            }}
-          >
-            <div className="flex-col p-4 w-full">
-              {verbalScores.map((obj, index) => (
-                <div className="flex items-center w-full py-4" key={index}>
-                  <p className="flex-grow text-left font-bold">{obj.name}</p>
-                  <p className="w-12 text-center mr-20">{`${obj.score}`}</p>
-                  <ProgressBar
-                    value={obj.score}
-                    color={"amber"}
-                    className="w-[40%]"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div
-          className="flex-col w-[20vw] ml-3 mr-5"
-          onMouseEnter={() => {
-            setSelectedDiv("overall");
-          }}
-          onMouseLeave={() => {
-            setSelectedDiv("");
-          }}
-        >
-          <div
-            className={`bg-neutral-700 border-t border-l border-r ${selectedDiv == "overall"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } h-[5vh]`}
-            style={{
-              borderTopLeftRadius: "10px",
-              borderTopRightRadius: "10px",
-              borderBottomRightRadius: "0",
-              borderBottomLeftRadius: "0",
-            }}
-          >
-            <p className="p-2 font-bold">Overall</p>
-          </div>
-          <div
-            className={`bg-neutral-800 border-b border-l border-r ${selectedDiv == "overall"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } h-[30vh] flex items-center justify-center`}
-            style={{
-              borderTopLeftRadius: "0",
-              borderTopRightRadius: "0",
-              borderBottomRightRadius: "10px",
-              borderBottomLeftRadius: "10px",
-            }}
-          >
-            <ProgressCircle
-              value={overallScore}
-              color={"fuchsia"}
-              radius={radius}
-              strokeWidth={6}
-            >
-              <span className="text-white text-3xl font-bold">
-                {overallScore}
-              </span>
-            </ProgressCircle>
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-center mt-3">
-        <div
-          className="flex-col w-[75vw] ml-5"
-          onMouseEnter={() => {
-            setSelectedDiv("feedback");
-          }}
-          onMouseLeave={() => {
-            setSelectedDiv("");
-          }}
-        >
-          <div
-            className={`bg-neutral-700 border-t border-l border-r ${selectedDiv == "feedback"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } h-[5vh]`}
-            style={{
-              borderTopLeftRadius: "10px",
-              borderTopRightRadius: "10px",
-              borderBottomRightRadius: "0",
-              borderBottomLeftRadius: "0",
-            }}
-          >
-            <p className="p-2 font-bold">Coach's Report</p>
-          </div>
-          <div
-            className={`bg-neutral-800 border-l border-r ${selectedDiv == "feedback"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } h-[35vh] flex px-5 py-2 overflow-y-auto`}
-          >
-            <div className="flex-col">
-              {scoreDiscussion.map((msg, index) => (
-                <p
-                  key={index}
-                  dangerouslySetInnerHTML={{
-                    __html: msg.content,
-                  }}
-                  className={`py-1 whitespace-pre-wrap break-words ${msg.type === "gpt" ? "text-blue-300" : "text-white-300"
-                    }`}
-                ></p>
-              ))}
-            </div>
-          </div>
-          <div
-            className={`bg-neutral-800 border-b border-l border-r ${selectedDiv == "feedback"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } bottom-0 left-0 w-full p-2 bg-neutral-800`}
-            style={{
-              borderTopLeftRadius: "0px",
-              borderTopRightRadius: "0px",
-              borderBottomRightRadius: "10px",
-              borderBottomLeftRadius: "10px",
-            }}
-          >
-            <input
-              onKeyDown={async (event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  let temp = event.target.value;
-                  event.target.value = "";
-                  setScoreDicussion((prevHistory) => [
-                    ...prevHistory,
-                    { type: "user", content: markdownToHTML(temp) },
-                  ]);
-                  await chatWithCoach(temp);
-                }
-              }}
-              className="w-full h-[5vh] rounded-lg border border-neutral-700 bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Ask for more feedback..."
-              style={{ "--placeholder-color": "#a0aec0" }}
-            />
-          </div>
-        </div>
-        <div
-          className="flex-col w-[25vw] ml-3 mr-5"
-          onMouseEnter={() => {
-            setSelectedDiv("problems");
-          }}
-          onMouseLeave={() => {
-            setSelectedDiv("");
-          }}
-        >
-          <div
-            className={`bg-neutral-700 border-t border-l border-r ${selectedDiv == "problems"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } h-[5vh]`}
-            style={{
-              borderTopLeftRadius: "10px",
-              borderTopRightRadius: "10px",
-              borderBottomRightRadius: "0",
-              borderBottomLeftRadius: "0",
-            }}
-          >
-            <p className="p-2 font-bold">Keep Practicing</p>
-          </div>
-          <div
-            className={`bg-neutral-800 border-b border-l border-r ${selectedDiv == "problems"
-              ? "border-neutral-500"
-              : "border-neutral-700"
-              } h-[42vh] flex items-start justify-start overflow-y-auto`}
-            style={{
-              borderTopLeftRadius: "0",
-              borderTopRightRadius: "0",
-              borderBottomRightRadius: "10px",
-              borderBottomLeftRadius: "10px",
-            }}
-          >
-            {leetcodeMatches && (
-              <div className="p-4 w-full flex flex-col">
-                <p className="font-bold text-lg">Your Questions:</p>
 
-                {leetcodeMatches.map((match, index) => (
-                  <div key={index} className="flex items-center mb-3">
-                    <a
-                      href={match.metadata.url}
-                      className="pr-3 block"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {match.metadata.title}
-                    </a>
-                    <div
-                      className={`inline-block rounded-full font-bold bg-neutral-700 px-2 py-1 ${getDifficultyColor(
-                        match.metadata.difficulty
-                      )}`}
-                    >
-                      {match.metadata.difficulty}
+        {/* Main Content - Added overflow handling */}
+        <div className="grid grid-cols-[2fr_1fr] gap-6 flex-1 overflow-hidden">
+          {/* Left Column - Scores with scroll */}
+          <div className="space-y-6 overflow-y-auto pr-2">
+            {/* Overall Score Card */}
+            <div className="bg-[#0D0D1A] rounded-xl border border-gray-800 p-6">
+              <h2 className="text-xl font-semibold text-white mb-4">Overall Performance</h2>
+              <div className="flex items-center justify-center">
+                <ProgressCircle value={overallScore} size="xl" color="blue">
+                  <span className="text-3xl font-bold text-white">{overallScore}%</span>
+                </ProgressCircle>
+              </div>
+            </div>
+
+            {/* Technical Scores */}
+            <div className="bg-[#0D0D1A] rounded-xl border border-gray-800 p-6">
+              <h2 className="text-xl font-semibold text-white mb-4">Technical Skills</h2>
+              <div className="space-y-4">
+                {technicalScores.map((score, index) => (
+                  <div key={index}>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-gray-400">{score.name}</span>
+                      <span className="text-white">{score.score}%</span>
                     </div>
+                    <ProgressBar value={score.score} color="blue" />
                   </div>
                 ))}
-
-                <p className="font-bold text-lg">Similar Questions:</p>
-
-                {leetcodeMatches.map((match, index) =>
-                  parseProblems(match.metadata.similar_questions).map(
-                    (problem, index) => (
-                      <div key={index} className="flex items-center mb-3">
-                        <a
-                          href={problem.url}
-                          className="pr-3 block"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {problem.name}
-                        </a>
-                        <div
-                          className={`inline-block rounded-full font-bold bg-neutral-700 px-2 py-1 ${getDifficultyColor(
-                            problem.level
-                          )}`}
-                        >
-                          {problem.level}
-                        </div>
-                      </div>
-                    )
-                  )
-                )}
               </div>
-            )}
+            </div>
+
+            {/* Verbal Scores */}
+            <div className="bg-[#0D0D1A] rounded-xl border border-gray-800 p-6">
+              <h2 className="text-xl font-semibold text-white mb-4">Communication Skills</h2>
+              <div className="space-y-4">
+                {verbalScores.map((score, index) => (
+                  <div key={index}>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-gray-400">{score.name}</span>
+                      <span className="text-white">{score.score}%</span>
+                    </div>
+                    <ProgressBar value={score.score} color="purple" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Discussion with scroll */}
+          <div className="bg-[#0D0D1A] rounded-xl border border-gray-800 flex flex-col h-full">
+            <div className="p-4 border-b border-gray-800 flex-shrink-0">
+              <h2 className="text-xl font-semibold text-white">Interview Feedback</h2>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1">
+              <div className="space-y-4">
+                {scoreDiscussion.map((discussion, index) => (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-lg ${discussion.type === "gpt"
+                      ? "bg-blue-500/10 border border-blue-500/20"
+                      : "bg-purple-500/10 border border-purple-500/20"
+                      }`}
+                  >
+                    <p
+                      dangerouslySetInnerHTML={{ __html: discussion.content }}
+                      className="text-gray-300 whitespace-pre-wrap"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <style jsx>{`
-        code {
-          background-color: #333;
-          border-radius: 5px;
-          padding: 2px 5px;
-          font-family: "Courier New", Courier, monospace;
-          color: #e0e0e0;
-        }
-        .overflow-y-scroll {
-          overflow-y: scroll;
-        }
-        .overflow-x-hidden {
-          overflow-x: hidden;
-          word-wrap: break-word;
-        }
-        h1 {
-          font-size: 1.75em;
-          font-weight: bold;
-        }
-
-        h2 {
-          font-size: 1.5em;
-          font-weight: bold;
-        }
-
-        h3 {
-          font-size: 1.25em;
-          font-weight: bold;
-        }
-
-        h4 {
-          font-size: 1em;
-          font-weight: bold;
-        }
-
-        h5 {
-          font-size: 0.875em;
-          font-weight: bold;
-        }
-
-        h6 {
-          font-size: 0.75em;
-          font-weight: bold;
-        }
-      `}</style>
     </div>
   );
 }
